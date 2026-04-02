@@ -1,62 +1,33 @@
+#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
+#include "Game.h"
+#include "Entity.h"
+
 Uint32 frameStart;
 int frameTime;
-const int FPS = 30;
+const int FPS = 60;
 const int frameDelay = 1000 / FPS;
 
-int main(int argc, char* argv[]) {
-    SDL_Init(SDL_INIT_VIDEO);
+int main() {
+    Game game;
 
-    SDL_Window* window = SDL_CreateWindow(
-        "Hello Engine",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        800, 600,
-        0
-    );
+    game.Init();
+    while (game.running) {
+        frameStart = SDL_GetTicks();
+        game.HandleEvents();
+        game.Update();
+        game.Render();
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, 0);
+        
+        frameTime = SDL_GetTicks() - frameStart;
 
-    bool running = true;
-    SDL_Event event;
-
-    int x = 100, y = 100;
-
-    while (running) {
-    frameStart = SDL_GetTicks();
-
-    while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
-            running = false;
-        }
-    }
-
-    const Uint8* keystate = SDL_GetKeyboardState(NULL);
-
-    if (keystate[SDL_SCANCODE_W]) y -= 2;
-    if (keystate[SDL_SCANCODE_S]) y += 2;
-    if (keystate[SDL_SCANCODE_A]) x -= 2;
-    if (keystate[SDL_SCANCODE_D]) x += 2;
-
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-    SDL_RenderClear(renderer);
-
-    SDL_Rect rect = { x, y, 50, 50 };
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    SDL_RenderFillRect(renderer, &rect);
-
-    SDL_RenderPresent(renderer);
-
-    // 🔥 FPS 제한
-    frameTime = SDL_GetTicks() - frameStart;
-
-    if (frameDelay > frameTime) {
+        if (frameDelay > frameTime) {
         SDL_Delay(frameDelay - frameTime);
+        }
+
     }
-}
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+
+    game.Clean();
 
     return 0;
 }
