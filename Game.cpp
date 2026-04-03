@@ -4,6 +4,8 @@
 void Game::Init() {
     //작동 트리거 true
     running = true;
+    tileSize = 50;
+
     SDL_Init(SDL_INIT_VIDEO);
 
     window = SDL_CreateWindow(
@@ -15,6 +17,14 @@ void Game::Init() {
     );
 
     renderer = SDL_CreateRenderer(window, -1, 0);
+
+    map = {
+        {1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 1},
+        {1, 0, 0, 0, 1},
+        {1, 0, 1, 0, 1},
+        {1, 1, 1, 1, 1}
+    };
     
     for(int i = 0; i < 5; i++){
         Entity e;
@@ -56,7 +66,30 @@ void Game::Update() {
                     
                 }
             }
-        }
+            for (int y = 0; y < map.size(); y++) {
+                for (int x = 0; x < map[y].size(); x++) {
+
+                    if (map[y][x] == 1) {
+
+                        SDL_Rect wall = {
+                            x * tileSize,
+                            y * tileSize,
+                            tileSize,
+                            tileSize
+                        };
+
+                        SDL_Rect playerRect = {
+                            e.x, e.y, e.width, e.height
+                        };
+
+                        if (SDL_HasIntersection(&playerRect, &wall)) {
+                            e.x = prevX;
+                            e.y = prevY;
+                        }
+                    }
+                }
+            }
+        } 
     }
 }
 
@@ -64,6 +97,22 @@ void Game::Render(){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
+    for (int y = 0; y < map.size(); y++) {
+        for (int x = 0; x < map[y].size(); x++) {
+
+            if (map[y][x] == 1) {
+                SDL_Rect wall = {
+                    x * tileSize,
+                    y * tileSize,
+                    tileSize,
+                    tileSize
+                };
+
+                SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+                SDL_RenderFillRect(renderer, &wall);
+            }
+        }
+    }
     for (auto& e : entities){
         e.Render(renderer);
     }

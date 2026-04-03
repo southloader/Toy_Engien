@@ -8,6 +8,8 @@ public:
     void Update();
     void Render();
     void Clean();
+    std::vector<std::vector<int>> map;
+    int tileSize;
 
     bool running;
 
