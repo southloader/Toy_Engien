@@ -1,5 +1,6 @@
 #include "Game.h"
 
+
 //Game 생성자
 void Game::Init() {
     //작동 트리거 true
@@ -19,11 +20,15 @@ void Game::Init() {
     renderer = SDL_CreateRenderer(window, -1, 0);
 
     map = {
-        {1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 1},
-        {1, 0, 1, 0, 1},
-        {1, 1, 1, 1, 1}
+        {0, 0, 0, 1, 1, 1, 1, 1},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0},
+        {1, 0, 0, 0, 0, 0, 0, 0},
+        {1, 1, 1, 0, 0, 0, 0, 0}
     };
     
     for(int i = 0; i < 5; i++){
@@ -32,19 +37,23 @@ void Game::Init() {
         e.y = 50*i;
         e.width = 50;
         e.height = 50;
-        if(i == 0) e.type = PLAYER;
+        if(i == 4) e.type = PLAYER;
         else e.type = ENEMY;
 
         entities.push_back(e);
     }
 }
 
-void Game::Update() {
+void Game::Update(Camera * camera) {
     // 키보드 입력 불러오기
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
 
     for (auto& e : entities) {
         if (e.type == PLAYER) {
+
+            //화면 중앙 기준 상수.
+            camera->x = e.x - 400;
+            camera->y = e.y - 300;
 
             int prevX = e.x;
             int prevY = e.y;
@@ -55,7 +64,7 @@ void Game::Update() {
             if (keystate[SDL_SCANCODE_A]) e.x -= 2;
             if (keystate[SDL_SCANCODE_D]) e.x += 2;
 
-            // 🔥 충돌 검사
+            // 충돌 검사
             for (auto& other : entities) {
                 if (&e == &other) continue;
 
@@ -72,8 +81,8 @@ void Game::Update() {
                     if (map[y][x] == 1) {
 
                         SDL_Rect wall = {
-                            x * tileSize,
-                            y * tileSize,
+                            x * tileSize - camera->x,
+                            y * tileSize - camera->y,
                             tileSize,
                             tileSize
                         };
@@ -93,7 +102,7 @@ void Game::Update() {
     }
 }
 
-void Game::Render(){
+void Game::Render(Camera cam){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
@@ -114,7 +123,7 @@ void Game::Render(){
         }
     }
     for (auto& e : entities){
-        e.Render(renderer);
+        e.Render(renderer, cam);
     }
 
     SDL_RenderPresent(renderer);

@@ -1,5 +1,9 @@
-#include <SDL2/SDL.h>
 #pragma once
+#include <SDL2/SDL.h>
+
+struct Camera {
+    int x, y;
+};
 
 enum EntityType {
     PLAYER,
@@ -16,5 +20,5 @@ public:
     bool CheckCollision(Entity& other);
 
     void Update();
-    void Render(SDL_Renderer* renderer);
+    void Render(SDL_Renderer* renderer, Camera camera);
 };

@@ -1,7 +1,15 @@
 #include "Entity.h"
 
-void Entity::Render(SDL_Renderer* renderer){
-    SDL_Rect rect = { x, y, width, height };
+void Entity::Render(SDL_Renderer* renderer, Camera camera){
+
+    //카메라 기준 중앙 정렬
+    SDL_Rect rect = { 
+        x - camera.x,
+        y - camera.y, 
+        width, 
+        height 
+    };
+
     if (type == PLAYER)
         SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255); // 초록
     else

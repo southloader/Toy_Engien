@@ -1,12 +1,15 @@
+#pragma once
 #include <vector>
+#include <SDL2/SDL.h>
 #include "Entity.h"
+
 
 class Game {
 public:
     void Init();
     void HandleEvents();
-    void Update();
-    void Render();
+    void Update(Camera * cam);
+    void Render(Camera cam);
     void Clean();
     std::vector<std::vector<int>> map;
     int tileSize;
