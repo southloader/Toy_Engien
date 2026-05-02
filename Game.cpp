@@ -20,15 +20,15 @@ void Game::Init() {
     renderer = SDL_CreateRenderer(window, -1, 0);
 
     map = {
-        {0, 0, 0, 1, 1, 1, 1, 1},
+        {0, 1, 1, 1, 1, 1, 1, 1},
         {0, 0, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0, 0},
-        {1, 0, 0, 0, 0, 0, 0, 0},
-        {1, 1, 1, 0, 0, 0, 0, 0}
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0},
+        {1, 0, 1, 1, 0, 0, 0, 0},
+        {1, 0, 0, 1, 0, 0, 0, 0},
+        {1, 0, 0, 1, 0, 0, 0, 0},
+        {1, 0, 0, 1, 0, 0, 0, 0},
+        {1, 1, 1, 1, 0, 0, 0, 0}
     };
     
     for(int i = 0; i < 5; i++){
@@ -44,16 +44,12 @@ void Game::Init() {
     }
 }
 
-void Game::Update(Camera * camera) {
+void Game::Update() {
     // 키보드 입력 불러오기
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
 
     for (auto& e : entities) {
         if (e.type == PLAYER) {
-
-            //화면 중앙 기준 상수.
-            camera->x = e.x - 400;
-            camera->y = e.y - 300;
 
             int prevX = e.x;
             int prevY = e.y;
@@ -63,6 +59,9 @@ void Game::Update(Camera * camera) {
             if (keystate[SDL_SCANCODE_S]) e.y += 2;
             if (keystate[SDL_SCANCODE_A]) e.x -= 2;
             if (keystate[SDL_SCANCODE_D]) e.x += 2;
+
+            camera.x = e.x + e.width / 2 - camera.width / 2;
+            camera.y = e.y + e.height / 2 - camera.height / 2;
 
             // 충돌 검사
             for (auto& other : entities) {
@@ -81,8 +80,8 @@ void Game::Update(Camera * camera) {
                     if (map[y][x] == 1) {
 
                         SDL_Rect wall = {
-                            x * tileSize - camera->x,
-                            y * tileSize - camera->y,
+                            x * tileSize,
+                            y * tileSize,
                             tileSize,
                             tileSize
                         };
@@ -102,7 +101,7 @@ void Game::Update(Camera * camera) {
     }
 }
 
-void Game::Render(Camera cam){
+void Game::Render(){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
@@ -111,8 +110,8 @@ void Game::Render(Camera cam){
 
             if (map[y][x] == 1) {
                 SDL_Rect wall = {
-                    x * tileSize,
-                    y * tileSize,
+                    x * tileSize - camera.x,
+                    y * tileSize - camera.y,
                     tileSize,
                     tileSize
                 };
@@ -123,7 +122,7 @@ void Game::Render(Camera cam){
         }
     }
     for (auto& e : entities){
-        e.Render(renderer, cam);
+        e.Render(renderer, camera);
     }
 
     SDL_RenderPresent(renderer);

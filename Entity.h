@@ -1,9 +1,6 @@
 #pragma once
 #include <SDL2/SDL.h>
-
-struct Camera {
-    int x, y;
-};
+#include "Camera.h"
 
 enum EntityType {
     PLAYER,

@@ -8,16 +8,19 @@ class Game {
 public:
     void Init();
     void HandleEvents();
-    void Update(Camera * cam);
-    void Render(Camera cam);
+    void Update();
+    void Render();
     void Clean();
-    std::vector<std::vector<int>> map;
-    int tileSize;
 
     bool running;
 
 private:
     std::vector<Entity> entities;
+    std::vector<std::vector<int>> map;
+    int tileSize;
+
     SDL_Window* window;
     SDL_Renderer* renderer;
+
+    Camera camera;
 };
