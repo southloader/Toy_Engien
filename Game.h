@@ -12,6 +12,7 @@ public:
     void Render();
     void Clean();
 
+    void ShowExitConfirm();
     bool running;
 
 private:
