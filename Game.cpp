@@ -46,11 +46,30 @@ void Game::Init() {
 
         entities.push_back(e);
     }
+
+    //버튼 설정
+    exitButton.x = 0;
+    exitButton.y = 0;
+    exitButton.width = 200;
+    exitButton.height = 80;
+
+    //텍스트 출력
+    if (TTF_Init() == -1) {
+        printf("TTF Init Failed: %s\n", TTF_GetError());
+    }
+
+    font = TTF_OpenFont("assets/font.ttf", 24);
+
+    if (font == nullptr) {
+        printf("Font Load Failed: %s\n", TTF_GetError());
+    }
+
 }
 
 void Game::Update() {
     // 키보드 입력 불러오기
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
+    exitButton.Update();
 
     for (auto& e : entities) {
         if (e.type == PLAYER) {
@@ -129,9 +148,16 @@ void Game::Render(){
             }
         }
     }
+    
+
     for (auto& e : entities){
         e.Render(renderer, camera);
     }
+
+    exitButton.Render(renderer);
+
+    RenderText(renderer, font, "Hello Engine", 20, 0);
+    RenderText(renderer, font, "게임 종료", 20, 40);
 
     SDL_RenderPresent(renderer);
 }
@@ -146,7 +172,7 @@ void Game::ShowExitConfirm(){
         SDL_MESSAGEBOX_INFORMATION,
         window,
         "종료 확인",
-        "게임을 종료.",
+        "게임을 종료  ",
         SDL_arraysize(buttons),
         buttons,
         nullptr
@@ -168,6 +194,12 @@ void Game::Clean() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+    if (font != nullptr) {
+        TTF_CloseFont(font);
+        font = nullptr;
+    }
+
+    TTF_Quit();
 }
 
 void Game::HandleEvents() {
@@ -177,6 +209,16 @@ void Game::HandleEvents() {
         if (event.type == SDL_QUIT) {
             running = false;
         }
+        //버튼 이벤트 
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+
+            int mouseX = event.button.x;
+            int mouseY = event.button.y;
+
+            if (exitButton.IsClicked(mouseX, mouseY)) {
+                running = false;
+            }
+        }
 
         if (event.type == SDL_KEYDOWN){   
             if(event.key.keysym.sym == SDLK_ESCAPE){
@@ -184,4 +226,32 @@ void Game::HandleEvents() {
             }
         }    
     }
+}
+
+void Game::RenderText(SDL_Renderer* renderer, TTF_Font* font, const char* text, int x, int y) {
+    if (font == nullptr) return;
+
+    SDL_Color color = {255, 255, 255, 255};
+
+    SDL_Surface* surface = TTF_RenderUTF8_Blended(font, text, color);
+
+    if (surface == nullptr) {
+        printf("Text Surface Failed: %s\n", TTF_GetError());
+        return;
+    }
+
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+
+    if (texture == nullptr) {
+        printf("Text Texture Failed: %s\n", SDL_GetError());
+        SDL_FreeSurface(surface);
+        return;
+    }
+
+    SDL_Rect dst = { x, y, surface->w, surface->h };
+
+    SDL_RenderCopy(renderer, texture, nullptr, &dst);
+
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
 }

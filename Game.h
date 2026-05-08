@@ -1,8 +1,10 @@
 #pragma once
+#include <stdio.h>
 #include <vector>
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include "Entity.h"
-
+#include "UIButton.h"
+#include <SDL_ttf.h>
 
 class Game {
 public:
@@ -12,6 +14,7 @@ public:
     void Render();
     void Clean();
 
+    void RenderText(SDL_Renderer* renderer, TTF_Font* font, const char* text, int x, int y);
     void ShowExitConfirm();
     bool running;
 
@@ -22,6 +25,8 @@ private:
 
     SDL_Window* window;
     SDL_Renderer* renderer;
-
+    TTF_Font * font;
     Camera camera;
+
+    UIButton exitButton;
 };
