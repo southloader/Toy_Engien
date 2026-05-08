@@ -162,34 +162,6 @@ void Game::Render(){
     SDL_RenderPresent(renderer);
 }
 
-void Game::ShowExitConfirm(){
-    const SDL_MessageBoxButtonData buttons[] = {
-        { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "예" },
-        { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "아니오" }
-    };
-
-    const SDL_MessageBoxData messageboxdata = {
-        SDL_MESSAGEBOX_INFORMATION,
-        window,
-        "종료 확인",
-        "게임을 종료  ",
-        SDL_arraysize(buttons),
-        buttons,
-        nullptr
-    };
-
-    int buttonid;
-
-    if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0) {
-        return;
-    }
-
-    if (buttonid == 1) {
-        running = false;
-    }
-
-};
-
 void Game::Clean() {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
@@ -209,49 +181,5 @@ void Game::HandleEvents() {
         if (event.type == SDL_QUIT) {
             running = false;
         }
-        //버튼 이벤트 
-        if (event.type == SDL_MOUSEBUTTONDOWN) {
-
-            int mouseX = event.button.x;
-            int mouseY = event.button.y;
-
-            if (exitButton.IsClicked(mouseX, mouseY)) {
-                running = false;
-            }
-        }
-
-        if (event.type == SDL_KEYDOWN){   
-            if(event.key.keysym.sym == SDLK_ESCAPE){
-                ShowExitConfirm();
-            }
-        }    
     }
-}
-
-void Game::RenderText(SDL_Renderer* renderer, TTF_Font* font, const char* text, int x, int y) {
-    if (font == nullptr) return;
-
-    SDL_Color color = {255, 255, 255, 255};
-
-    SDL_Surface* surface = TTF_RenderUTF8_Blended(font, text, color);
-
-    if (surface == nullptr) {
-        printf("Text Surface Failed: %s\n", TTF_GetError());
-        return;
-    }
-
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-
-    if (texture == nullptr) {
-        printf("Text Texture Failed: %s\n", SDL_GetError());
-        SDL_FreeSurface(surface);
-        return;
-    }
-
-    SDL_Rect dst = { x, y, surface->w, surface->h };
-
-    SDL_RenderCopy(renderer, texture, nullptr, &dst);
-
-    SDL_FreeSurface(surface);
-    SDL_DestroyTexture(texture);
 }
