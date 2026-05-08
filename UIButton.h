@@ -22,6 +22,4 @@ void Render(SDL_Renderer* renderer);
 
 bool IsClicked(int mouseX, int mouseY);
 
-
-
 };
