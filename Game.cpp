@@ -52,6 +52,7 @@ void Game::Init() {
     exitButton.y = 0;
     exitButton.width = 200;
     exitButton.height = 80;
+    exitButton.text = "종료";
 
     //텍스트 출력
     if (TTF_Init() == -1) {
@@ -154,10 +155,8 @@ void Game::Render(){
         e.Render(renderer, camera);
     }
 
-    exitButton.Render(renderer);
+    exitButton.Render(renderer,font);
 
-    RenderText(renderer, font, "Hello Engine", 20, 0);
-    RenderText(renderer, font, "게임 종료", 20, 40);
 
     SDL_RenderPresent(renderer);
 }
@@ -174,6 +173,34 @@ void Game::Clean() {
     TTF_Quit();
 }
 
+void Game::ShowExitConfirm(){
+    const SDL_MessageBoxButtonData buttons[] = {
+        { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "예" },
+        { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 0, "아니오" }
+    };
+
+    const SDL_MessageBoxData messageboxdata = {
+        SDL_MESSAGEBOX_INFORMATION,
+        window,
+        "종료 확인",
+        "게임을 종료.",
+        SDL_arraysize(buttons),
+        buttons,
+        nullptr
+    };
+
+    int buttonid;
+
+    if (SDL_ShowMessageBox(&messageboxdata, &buttonid) < 0) {
+        return;
+    }
+
+    if (buttonid == 1) {
+        running = false;
+    }
+
+};
+
 void Game::HandleEvents() {
     SDL_Event event;
 
@@ -181,5 +208,23 @@ void Game::HandleEvents() {
         if (event.type == SDL_QUIT) {
             running = false;
         }
+         //버튼 이벤트 
+        if (event.type == SDL_MOUSEBUTTONDOWN) {
+
+            int mouseX = event.button.x;
+            int mouseY = event.button.y;
+
+            if (exitButton.IsClicked(mouseX, mouseY)) {
+                running = false;
+            }
+        }
+
+        if (event.type == SDL_KEYDOWN){   
+            if(event.key.keysym.sym == SDLK_ESCAPE){
+                ShowExitConfirm();
+            }
+        }
     }
 }
+
+
