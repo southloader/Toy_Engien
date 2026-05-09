@@ -48,11 +48,15 @@ void Game::Init() {
     }
 
     //버튼 설정
+    UIButton exitButton;
+    exitButton.id = "exit";
     exitButton.x = 0;
     exitButton.y = 0;
     exitButton.width = 200;
     exitButton.height = 80;
     exitButton.text = "종료";
+
+    uiManager.AddButton(exitButton);
 
     //텍스트 출력
     if (TTF_Init() == -1) {
@@ -70,7 +74,7 @@ void Game::Init() {
 void Game::Update() {
     // 키보드 입력 불러오기
     const Uint8* keystate = SDL_GetKeyboardState(NULL);
-    exitButton.Update();
+    uiManager.Update();
 
     for (auto& e : entities) {
         if (e.type == PLAYER) {
@@ -155,7 +159,7 @@ void Game::Render(){
         e.Render(renderer, camera);
     }
 
-    exitButton.Render(renderer,font);
+    uiManager.Render(renderer,font);
 
 
     SDL_RenderPresent(renderer);
@@ -214,7 +218,9 @@ void Game::HandleEvents() {
             int mouseX = event.button.x;
             int mouseY = event.button.y;
 
-            if (exitButton.IsClicked(mouseX, mouseY)) {
+            std::string clicked_id = uiManager.GetClickedButtonId(mouseX, mouseY);
+
+            if (clicked_id == "exit") {
                 running = false;
             }
         }

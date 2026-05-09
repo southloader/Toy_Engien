@@ -16,6 +16,7 @@ int brightness = 255;
 //호버체크 플래그
 bool isHovered = false;
 
+std::string id;
 std::string text;
 
 void Update();

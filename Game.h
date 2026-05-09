@@ -4,6 +4,7 @@
 #include <SDL.h>
 #include "Entity.h"
 #include "UIButton.h"
+#include "UIManager.h"
 #include <SDL_ttf.h>
 
 class Game {
@@ -27,6 +28,7 @@ private:
     SDL_Renderer* renderer;
     TTF_Font * font;
     Camera camera;
+    UIManager uiManager;
 
-    UIButton exitButton;
+    
 };
