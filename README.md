@@ -19,3 +19,9 @@
 * 사용 언어: C++
 * 개발 환경: vs code, gnu 
 * 현재 진행 상태: Game state 설정
+
+
+## 여지까지 해결한 Critical error
+
+* Redefinition Error -> 문어발식으로 연결된 헤더파일이 문제였기에, Game.h를 root로 두는 트리 형식으로 구조를 바꿔 해결함
+* 
