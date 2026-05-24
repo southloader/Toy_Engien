@@ -1,14 +1,27 @@
-This is just compliments of record which I genuinely fought with chatGPT.
-I AM NOT JOKINGS.
-SERIOUS.
+# Toy Engine Prototype
 
-The concept of this shitty project is 'Wow AIs are really suck! especially Game engine!'
-So, I make a BASH-like game engine for miserable and pathetic AIs.
-as they can play with game engines. That's the goal. maybe.
-That's a whole point. y know.
+게임 엔진의 기본 구조를 이해하기 위해 개발 중인 토이 엔진 프로젝트입니다.
 
-And I'm Korean. 
-so many of my answers are pretty ache and rubbished English.
-also this readme.
+## 목표
 
-그러니까 이해하려면 번역기 키세요. 요즘 AI 번역 잘하던데.
+* 엔진의 update loop 구조 이해
+* UI 요소 식별 구조 설계
+* 입력 처리 및 객체 관리 구조 실험
+* 유지보수 가능한 코드 구조 학습
+
+## 내가 고민한 부분
+
+* 엔진 사용자와 개발자가 UI 요소를 직관적으로 다룰 수 있도록 id 기반 식별 구조를 구상했습니다.
+* 단순 기능 구현보다 내부 구조와 확장성을 이해하는 데 초점을 두었습니다.
+
+## 사용 기술
+
+* 사용 언어: C++
+* 개발 환경: vs code, gnu 
+* 현재 진행 상태: Game state 설정
+
+
+## 여지까지 해결한 Critical error
+
+* Redefinition Error -> 문어발식으로 연결된 헤더파일이 문제였기에, Game.h를 root로 두는 트리 형식으로 구조를 바꿔 해결함
+* ┗-> 추가로 '#pragma once' 를 남발하는 것이 유일한 해답이 아닌 걸 알아냄..
