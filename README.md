@@ -25,3 +25,32 @@
 
 * Redefinition Error -> 문어발식으로 연결된 헤더파일이 문제였기에, Game.h를 root로 두는 트리 형식으로 구조를 바꿔 해결함
 * ┗-> 추가로 '#pragma once' 를 남발하는 것이 유일한 해답이 아닌 걸 알아냄..
+
+## 개발 기록
+
+### 2026-05-24
+
+오늘은 Scene 구조를 정리하고 `PauseScene`을 추가했다.
+
+### 추가된 기능
+
+- `Scene` 기반 화면 구조 도입
+- `MainMenuScene`, `PlayScene`, `PauseScene` 구조 정리
+- 플레이 중 `ESC` 입력 시 일시정지 화면 진입
+- Pause 메뉴 UI 추가
+  - 계속하기
+  - 메인 메뉴
+  - 게임 종료
+- Pause 상태에서 기존 PlayScene 화면 위에 반투명 오버레이 출력
+
+### 개선된 점
+
+- `Game.cpp`의 역할을 줄이고 Scene별 책임을 분리하기 시작함
+- UI 버튼 처리와 Scene 전환 흐름이 더 명확해짐
+- 앞으로 OptionScene, SceneManager 확장 가능성이 생김
+
+### 다음 목표
+
+- SceneManager 도입
+- ResourceManager 설계
+- Texture / Sprite 렌더링 시스템 추가
