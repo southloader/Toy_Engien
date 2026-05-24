@@ -1,11 +1,16 @@
 #pragma once
 #include <stdio.h>
 #include <vector>
-#include <SDL.h>
-#include "Entity.h"
-#include "UIButton.h"
-#include "UIManager.h"
-#include <SDL_ttf.h>
+#include "MainMenuScene.h"
+#include "PlayScene.h"
+#include "PauseScene.h"
+
+enum class GameState {
+    MainMenu,
+    Playing,
+    ExitConfirm
+
+};
 
 class Game {
 public:
@@ -14,12 +19,15 @@ public:
     void Update();
     void Render();
     void Clean();
-
     void RenderText(SDL_Renderer* renderer, TTF_Font* font, const char* text, int x, int y);
     void ShowExitConfirm();
     bool running;
 
 private:
+    Scene* currentScene;
+    MainMenuScene* mainMenuScene;
+    PauseScene* pauseScene;
+    PlayScene* playScene;
     std::vector<Entity> entities;
     std::vector<std::vector<int>> map;
     int tileSize;
@@ -29,6 +37,5 @@ private:
     TTF_Font * font;
     Camera camera;
     UIManager uiManager;
-
-    
+    GameState currState;
 };

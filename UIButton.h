@@ -19,6 +19,10 @@ bool isHovered = false;
 std::string id;
 std::string text;
 
+SDL_Color normalColor;
+SDL_Color hoverColor;
+SDL_Color textColor;
+
 void Update();
 
 //렌더러

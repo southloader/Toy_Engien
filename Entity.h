@@ -5,7 +5,8 @@
 enum EntityType {
     PLAYER,
     ENEMY,
-    OBJ
+    OBJ,
+    NPC
 };
 
 class Entity {

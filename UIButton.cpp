@@ -1,12 +1,21 @@
 #include "UIButton.h"
 
 void UIButton::Render(SDL_Renderer* renderer, TTF_Font* font) {
+    SDL_Color currentColor = {255, 255, 255, 255};
     SDL_Rect rect = {x, y, width, height};
 
     if (isHovered)
-        SDL_SetRenderDrawColor(renderer, 100, 100, brightness - 90, 255);
+        currentColor = hoverColor;
     else
-        SDL_SetRenderDrawColor(renderer, 100, 100, brightness, 255);
+        currentColor = normalColor;
+      
+    SDL_SetRenderDrawColor(
+        renderer,
+        currentColor.r,
+        currentColor.g,
+        currentColor.b,
+        currentColor.a
+    );
     SDL_RenderFillRect(renderer, &rect);
 
     if(font == nullptr || text.empty()) return;

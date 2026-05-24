@@ -5,6 +5,9 @@
 void Game::Init() {
     //작동 트리거 true
     running = true;
+
+    currState = GameState::MainMenu;
+
     tileSize = 50;
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -47,17 +50,6 @@ void Game::Init() {
         entities.push_back(e);
     }
 
-    //버튼 설정
-    UIButton exitButton;
-    exitButton.id = "exit";
-    exitButton.x = 0;
-    exitButton.y = 0;
-    exitButton.width = 200;
-    exitButton.height = 80;
-    exitButton.text = "종료";
-
-    uiManager.AddButton(exitButton);
-
     //텍스트 출력
     if (TTF_Init() == -1) {
         printf("TTF Init Failed: %s\n", TTF_GetError());
@@ -69,98 +61,58 @@ void Game::Init() {
         printf("Font Load Failed: %s\n", TTF_GetError());
     }
 
+    //씬 구성
+    mainMenuScene = new MainMenuScene(font);
+    playScene = new PlayScene();
+    pauseScene = new PauseScene(font);
+
+    currentScene = mainMenuScene;
 }
 
 void Game::Update() {
-    // 키보드 입력 불러오기
-    const Uint8* keystate = SDL_GetKeyboardState(NULL);
-    uiManager.Update();
+    currentScene->Update();
 
-    for (auto& e : entities) {
-        if (e.type == PLAYER) {
+    if (currentScene == mainMenuScene) {
+        MenuAction action = mainMenuScene->GetAction();
 
-            // 충돌 시 좌표 복구를 위한 이전 좌표 저장
-            int prevX = e.x;
-            int prevY = e.y;
-
-            // 이동
-            if (keystate[SDL_SCANCODE_W]) e.y -= 2;
-            if (keystate[SDL_SCANCODE_S]) e.y += 2;
-            if (keystate[SDL_SCANCODE_A]) e.x -= 2;
-            if (keystate[SDL_SCANCODE_D]) e.x += 2;
-
-            // 카메라도 같이 이동
-            camera.x = e.x + e.width / 2 - camera.width / 2;
-            camera.y = e.y + e.height / 2 - camera.height / 2;
-
-            // 충돌 검사
-            for (auto& other : entities) {
-                if (&e == &other) continue;
-
-                if (e.CheckCollision(other)) {
-                    // 충돌하면 되돌리기
-                    e.x = prevX;
-                    e.y = prevY;
-                    
-                }
-            }
-
-            //맵 그리기
-            for (int y = 0; y < map.size(); y++) {
-                for (int x = 0; x < map[y].size(); x++) {
-
-                    if (map[y][x] == 1) {
-
-                        SDL_Rect wall = {
-                            x * tileSize,
-                            y * tileSize,
-                            tileSize,
-                            tileSize
-                        };
-
-                        SDL_Rect playerRect = {
-                            e.x, e.y, e.width, e.height
-                        };
-
-                        if (SDL_HasIntersection(&playerRect, &wall)) {
-                            e.x = prevX;
-                            e.y = prevY;
-                        }
-                    }
-                }
-            }
-        } 
+        if (action == MenuAction::StartGame) {
+            currentScene = playScene;
+            mainMenuScene->ClearAction();
+        }
+        else if (action == MenuAction::ExitGame) {
+            running = false;
+            mainMenuScene->ClearAction();
+        }
+    }
+    if (currentScene == pauseScene) {
+        PauseAction action = pauseScene->GetAction();
+        if (action == PauseAction::Resume) {
+            currentScene = playScene;
+            pauseScene->ClearAction();
+        }
+        else if (action == PauseAction::MainMenu) {
+            currentScene = mainMenuScene;
+            pauseScene->ClearAction();
+        }
+        else if (action == PauseAction::Exit) {
+            running = false;
+            pauseScene->ClearAction();
+        }
     }
 }
 
-void Game::Render(){
+void Game::Render() {
+
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
 
-    for (int y = 0; y < map.size(); y++) {
-        for (int x = 0; x < map[y].size(); x++) {
-
-            if (map[y][x] == 1) {
-                SDL_Rect wall = {
-                    x * tileSize - camera.x,
-                    y * tileSize - camera.y,
-                    tileSize,
-                    tileSize
-                };
-
-                SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
-                SDL_RenderFillRect(renderer, &wall);
-            }
-        }
+    if (currentScene == pauseScene) {
+        playScene->Render(renderer);
+        pauseScene->Render(renderer);
+    } 
+    else {
+        currentScene->Render(renderer);
     }
-    
-
-    for (auto& e : entities){
-        e.Render(renderer, camera);
-    }
-
-    uiManager.Render(renderer,font);
-
 
     SDL_RenderPresent(renderer);
 }
@@ -175,6 +127,12 @@ void Game::Clean() {
     }
 
     TTF_Quit();
+    delete mainMenuScene;
+    delete playScene;
+
+    mainMenuScene = nullptr;
+    playScene = nullptr;
+    currentScene = nullptr;
 }
 
 void Game::ShowExitConfirm(){
@@ -212,24 +170,20 @@ void Game::HandleEvents() {
         if (event.type == SDL_QUIT) {
             running = false;
         }
-         //버튼 이벤트 
-        if (event.type == SDL_MOUSEBUTTONDOWN) {
+        if (event.type == SDL_KEYDOWN) {
 
-            int mouseX = event.button.x;
-            int mouseY = event.button.y;
+            if (event.key.keysym.sym == SDLK_ESCAPE) {
 
-            std::string clicked_id = uiManager.GetClickedButtonId(mouseX, mouseY);
+                if (currentScene == playScene) {
+                    currentScene = pauseScene;
+                }
 
-            if (clicked_id == "exit") {
-                running = false;
+                else if (currentScene == pauseScene) {
+                    currentScene = playScene;
+                }
             }
         }
-
-        if (event.type == SDL_KEYDOWN){   
-            if(event.key.keysym.sym == SDLK_ESCAPE){
-                ShowExitConfirm();
-            }
-        }
+        currentScene->HandleEvents(event);
     }
 }
 
