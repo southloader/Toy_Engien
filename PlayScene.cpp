@@ -1,6 +1,8 @@
 #include "PlayScene.h"
 
 PlayScene::PlayScene() {
+    request = SceneRequest::None;
+
     camera.x = 0;
     camera.y = 0;
     camera.width = 800;
@@ -48,8 +50,11 @@ void PlayScene::InitEntities() {
 }
 
 void PlayScene::HandleEvents(SDL_Event& event) {
-    // 지금은 특별한 이벤트 없음
-    // ESC, pause 같은 건 나중에 추가
+    if (event.type == SDL_KEYDOWN) {
+        if (event.key.keysym.sym == SDLK_ESCAPE) {
+            request = SceneRequest::GoToPause;
+        }
+    }
 }
 
 void PlayScene::MovePlayer(Entity& player, int moveX, int moveY){
@@ -236,3 +241,10 @@ void PlayScene::RenderMap(SDL_Renderer* renderer) {
     }
 }
 
+SceneRequest PlayScene::GetRequest() {
+    return request;
+}
+
+void PlayScene::ClearRequest() {
+    request = SceneRequest::None;
+}

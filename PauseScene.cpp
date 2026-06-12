@@ -4,7 +4,7 @@ PauseScene::PauseScene(TTF_Font* font) {
 
     this->font = font;
 
-    action = PauseAction::None;
+    request = SceneRequest::None;
 
     UIButton resumeButton;
     resumeButton.id = "resume";
@@ -54,7 +54,7 @@ void PauseScene::Render(SDL_Renderer* renderer) {
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 180);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 80);
 
     SDL_Rect overlay = {0, 0, 800, 600};
 
@@ -74,23 +74,23 @@ void PauseScene::HandleEvents(SDL_Event& event) {
             uiManager.GetClickedButtonId(mouseX, mouseY);
 
         if (clickedId == "resume") {
-            action = PauseAction::Resume;
+            request = SceneRequest::GoToPlay;
         }
 
         else if (clickedId == "menu") {
-            action = PauseAction::MainMenu;
+            request = SceneRequest::GoToMainMenu;
         }
 
         else if (clickedId == "exit") {
-            action = PauseAction::Exit;
+            request = SceneRequest::ExitGame;
         }
     }
 }
 
-PauseAction PauseScene::GetAction() {
-    return action;
+SceneRequest PauseScene::GetRequest() {
+    return request;
 }
 
-void PauseScene::ClearAction() {
-    action = PauseAction::None;
+void PauseScene::ClearRequest() {
+    request = SceneRequest::None;
 }

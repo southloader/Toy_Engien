@@ -62,58 +62,22 @@ void Game::Init() {
     }
 
     //씬 구성
-    mainMenuScene = new MainMenuScene(font);
-    playScene = new PlayScene();
-    pauseScene = new PauseScene(font);
+    sceneManager.AddScene("MainMenu", new MainMenuScene(font));
+    sceneManager.AddScene("Play", new PlayScene());
+    sceneManager.AddScene("Pause", new PauseScene(font));
 
-    currentScene = mainMenuScene;
+    sceneManager.ChangeScene("MainMenu");
 }
 
 void Game::Update() {
-    currentScene->Update();
-
-    if (currentScene == mainMenuScene) {
-        MenuAction action = mainMenuScene->GetAction();
-
-        if (action == MenuAction::StartGame) {
-            currentScene = playScene;
-            mainMenuScene->ClearAction();
-        }
-        else if (action == MenuAction::ExitGame) {
-            running = false;
-            mainMenuScene->ClearAction();
-        }
-    }
-    if (currentScene == pauseScene) {
-        PauseAction action = pauseScene->GetAction();
-        if (action == PauseAction::Resume) {
-            currentScene = playScene;
-            pauseScene->ClearAction();
-        }
-        else if (action == PauseAction::MainMenu) {
-            currentScene = mainMenuScene;
-            pauseScene->ClearAction();
-        }
-        else if (action == PauseAction::Exit) {
-            running = false;
-            pauseScene->ClearAction();
-        }
-    }
+    sceneManager.Update();
+    sceneManager.ProcessRequest(running);
 }
 
 void Game::Render() {
-
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-
-    if (currentScene == pauseScene) {
-        playScene->Render(renderer);
-        pauseScene->Render(renderer);
-    } 
-    else {
-        currentScene->Render(renderer);
-    }
-
+    sceneManager.Render(renderer);
     SDL_RenderPresent(renderer);
 }
 
@@ -127,12 +91,7 @@ void Game::Clean() {
     }
 
     TTF_Quit();
-    delete mainMenuScene;
-    delete playScene;
-
-    mainMenuScene = nullptr;
-    playScene = nullptr;
-    currentScene = nullptr;
+    sceneManager.Clean();
 }
 
 void Game::ShowExitConfirm(){
@@ -170,21 +129,7 @@ void Game::HandleEvents() {
         if (event.type == SDL_QUIT) {
             running = false;
         }
-        if (event.type == SDL_KEYDOWN) {
 
-            if (event.key.keysym.sym == SDLK_ESCAPE) {
-
-                if (currentScene == playScene) {
-                    currentScene = pauseScene;
-                }
-
-                else if (currentScene == pauseScene) {
-                    currentScene = playScene;
-                }
-            }
-        }
-        currentScene->HandleEvents(event);
+        sceneManager.HandleEvents(event);
     }
 }
-
-

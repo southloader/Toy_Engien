@@ -6,13 +6,6 @@
 #include "Scene.h"
 #include "UIManager.h"
 
-enum class PauseAction {
-    None,
-    Resume,
-    MainMenu,
-    Exit
-};
-
 class PauseScene : public Scene {
 public:
     PauseScene(TTF_Font* font);
@@ -21,13 +14,11 @@ public:
     void Render(SDL_Renderer* renderer) override;
     void HandleEvents(SDL_Event& event) override;
 
-    PauseAction GetAction();
-    void ClearAction();
+    SceneRequest GetRequest() override;
+    void ClearRequest() override;
 
 private:
     UIManager uiManager;
-
+    SceneRequest request;
     TTF_Font* font;
-
-    PauseAction action;
 };

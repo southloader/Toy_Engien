@@ -15,10 +15,14 @@ public:
     void Render(SDL_Renderer* renderer) override;
     void HandleEvents(SDL_Event& event) override;
 
+    SceneRequest GetRequest() override;
+    void ClearRequest() override;
+
 private:
     std::vector<Entity> entities;
     std::vector<std::vector<int>> map;
 
+    SceneRequest request;
     Camera camera;
 
     int tileSize = 50;

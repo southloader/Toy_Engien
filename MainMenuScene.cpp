@@ -2,7 +2,7 @@
 
 MainMenuScene::MainMenuScene(TTF_Font* font) {
     this->font = font;
-    action = MenuAction::None;
+    request = SceneRequest::None;
 
     UIButton startButton;
     startButton.id = "start";
@@ -47,18 +47,18 @@ void MainMenuScene::HandleEvents(SDL_Event& event) {
         std::string clickedId = uiManager.GetClickedButtonId(mouseX, mouseY);
 
         if (clickedId == "start") {
-            action = MenuAction::StartGame;
+            request = SceneRequest::GoToPlay;
         }
         else if (clickedId == "exit") {
-            action = MenuAction::ExitGame;
+            request = SceneRequest::ExitGame;
         }
     }
 }
 
-MenuAction MainMenuScene::GetAction() {
-    return action;
+SceneRequest MainMenuScene::GetRequest() {
+    return request;
 }
 
-void MainMenuScene::ClearAction() {
-    action = MenuAction::None;
+void MainMenuScene::ClearRequest() {
+    request = SceneRequest::None;
 }

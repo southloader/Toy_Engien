@@ -6,12 +6,6 @@
 #include "Scene.h"
 #include "UIManager.h"
 
-enum class MenuAction {
-    None,
-    StartGame,
-    ExitGame
-};
-
 class MainMenuScene : public Scene {
 public:
     MainMenuScene(TTF_Font* font);
@@ -20,11 +14,11 @@ public:
     void Render(SDL_Renderer* renderer) override;
     void HandleEvents(SDL_Event& event) override;
 
-    MenuAction GetAction();
-    void ClearAction();
+    SceneRequest GetRequest() override;
+    void ClearRequest() override;
 
 private:
     UIManager uiManager;
     TTF_Font* font;
-    MenuAction action;
+    SceneRequest request;
 };

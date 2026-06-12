@@ -1,6 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <vector>
+#include "SceneManager.h"
 #include "MainMenuScene.h"
 #include "PlayScene.h"
 #include "PauseScene.h"
@@ -25,9 +26,7 @@ public:
 
 private:
     Scene* currentScene;
-    MainMenuScene* mainMenuScene;
-    PauseScene* pauseScene;
-    PlayScene* playScene;
+    SceneManager sceneManager;
     std::vector<Entity> entities;
     std::vector<std::vector<int>> map;
     int tileSize;
