@@ -54,3 +54,18 @@
 - SceneManager 도입
 - ResourceManager 설계
 - Texture / Sprite 렌더링 시스템 추가
+
+## 개발 기록
+
+### 2026-06-15
+
+#### SceneManager 도입
+
+기존에는 Game 클래스가 직접 Scene 객체를 관리하고
+현재 Scene 상태를 판단하여 처리했다.
+
+```text
+Game
+ ├── MainMenuScene
+ ├── PlayScene
+ └── PauseScene
