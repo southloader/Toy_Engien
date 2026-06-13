@@ -1,6 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <vector>
+#include "TextureManager.h"
 #include "SceneManager.h"
 #include "MainMenuScene.h"
 #include "PlayScene.h"
@@ -33,6 +34,7 @@ private:
 
     SDL_Window* window;
     SDL_Renderer* renderer;
+    TextureManager* textureManager;
     TTF_Font * font;
     Camera camera;
     UIManager uiManager;

@@ -16,6 +16,7 @@ public:
     EntityType type;
 
     bool CheckCollision(Entity& other);
+    SDL_Texture* texture = nullptr;
 
     void Update();
     void Render(SDL_Renderer* renderer, Camera camera);

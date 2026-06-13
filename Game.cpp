@@ -1,6 +1,5 @@
 #include "Game.h"
 
-
 //Game 생성자
 void Game::Init() {
     //작동 트리거 true
@@ -22,6 +21,11 @@ void Game::Init() {
     );
 
     renderer = SDL_CreateRenderer(window, -1, 0);
+
+    //텍스처 매니저
+    textureManager = new TextureManager(renderer);
+    textureManager->LoadTexture("player", "assets/player.png");
+    textureManager->LoadTexture("wall", "assets/brickWall.png");
 
     //맵 구현 2중 리스트. 그리는 대로 그려지니 참고할 것.
     map = {
@@ -63,7 +67,7 @@ void Game::Init() {
 
     //씬 구성
     sceneManager.AddScene("MainMenu", new MainMenuScene(font));
-    sceneManager.AddScene("Play", new PlayScene());
+    sceneManager.AddScene("Play", new PlayScene(textureManager));
     sceneManager.AddScene("Pause", new PauseScene(font));
 
     sceneManager.ChangeScene("MainMenu");
@@ -89,6 +93,9 @@ void Game::Clean() {
         TTF_CloseFont(font);
         font = nullptr;
     }
+    textureManager->Clean();
+    delete textureManager;
+    textureManager = nullptr;
 
     TTF_Quit();
     sceneManager.Clean();
