@@ -49,6 +49,53 @@
 - UI 버튼 처리와 Scene 전환 흐름이 더 명확해짐
 - 앞으로 OptionScene, SceneManager 확장 가능성이 생김
 
+## 개발 기록
+
+### 2026-06-13
+
+#### TextureManager 도입
+
+- SDL_image 연동
+- TextureManager 클래스 구현
+- 텍스처 로드 및 관리 기능 추가
+- 이미지 기반 렌더링 지원
+
+#### Entity 이미지 렌더링 적용
+
+- Entity가 SDL_Texture를 보유하도록 수정
+- SDL_RenderCopy 기반 렌더링 적용
+- 플레이어를 player.png로 렌더링하도록 변경
+
+#### Tile Texture 적용
+
+- wall.png 추가
+- 벽 타일을 이미지로 렌더링하도록 변경
+
+#### TileMap 시스템 분리
+
+PlayScene 내부에 존재하던 맵 관련 기능을 TileMap 클래스로 분리하였다.
+
+분리된 기능:
+
+- 맵 데이터 관리
+- 맵 렌더링
+- 충돌 검사
+- 충돌 해결
+- 맵 크기 계산
+
+구조:
+
+```text
+PlayScene
+ ├── Player
+ ├── Camera
+ └── TileMap
+
+TileMap
+ ├── Map Data
+ ├── Render
+ ├── Collision
+ └── World Size
 ### 다음 목표
 
 - SceneManager 도입
