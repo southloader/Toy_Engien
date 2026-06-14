@@ -96,6 +96,7 @@ TileMap
  ├── Render
  ├── Collision
  └── World Size
+```
 ### 다음 목표
 
 - SceneManager 도입
@@ -121,3 +122,4 @@ TileMap
 animator.Play("Idle");
 animator.Play("Walk");
 animator.Play("Run");
+```
