@@ -15,13 +15,35 @@ PlayScene::PlayScene(TextureManager* textureManager) {
 }
 
 void PlayScene::InitEntities() {
+    Animation idle;
+    idle.AddFrame(textureManager->GetTexture("player"));
+    idle.SetFrameDelay(1000);
+    playerAnimator.AddAnimation("Idle", idle);
+    
+    Animation walk;
+    walk.AddFrame(textureManager->GetTexture("player_walk1"));
+    walk.AddFrame(textureManager->GetTexture("player_walk2"));
+    walk.AddFrame(textureManager->GetTexture("player_walk3"));
+    walk.SetFrameDelay(150);
+    playerAnimator.AddAnimation("Walk", walk);
+
+    Animation run;
+    run.AddFrame(textureManager->GetTexture("player_run1"));
+    run.AddFrame(textureManager->GetTexture("player_run2"));
+    run.AddFrame(textureManager->GetTexture("player_run3"));
+    run.AddFrame(textureManager->GetTexture("player_run2"));
+    run.SetFrameDelay(100);
+    playerAnimator.AddAnimation("Run", run);
+
+    playerAnimator.Play("Idle");
+
     Entity player;
     player.x = 100;
     player.y = 100;
     player.width = 50;
     player.height = 50;
     player.type = PLAYER;
-    player.texture = textureManager->GetTexture("player");
+    player.animator = &playerAnimator;
 
     entities.push_back(player);
 
@@ -31,8 +53,10 @@ void PlayScene::InitEntities() {
     npc.width = 50;
     npc.height = 50;
     npc.type = NPC;
+    npc.texture = textureManager->GetTexture("Npc");
 
     entities.push_back(npc);
+
 }
 
 void PlayScene::HandleEvents(SDL_Event& event) {
@@ -85,8 +109,31 @@ void PlayScene::UpdatePlayer() {
         if (keyState[SDL_SCANCODE_A]) moveX -= speed;
         if (keyState[SDL_SCANCODE_D]) moveX += speed;
 
+        if (moveX > 0) {
+            e.direction = Direction::Right;
+        }
+        else if (moveX <0) {
+            e.direction = Direction::Left;
+        }
+
 
         MovePlayer(e, moveX, moveY);
+        
+        bool isMoving = moveX != 0 || moveY != 0;
+        bool isRunning = keyState[SDL_SCANCODE_LSHIFT];
+
+        if (!isMoving) {
+            playerAnimator.Play("Idle");
+        }
+        else if (isRunning) {
+            playerAnimator.Play("Run");
+        }
+        else {
+            playerAnimator.Play("Walk");
+        }
+
+        playerAnimator.Update();
+
         UpdateCamera(e);
     }
 }

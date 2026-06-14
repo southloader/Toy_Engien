@@ -23,10 +23,9 @@ public:
 
 private:
     std::vector<Entity> entities;
-    
+    Animator playerAnimator;
     TextureManager* textureManager;
     TileMap* tileMap;
-    
     SceneRequest request;
     Camera camera;
 

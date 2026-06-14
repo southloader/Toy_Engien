@@ -1,6 +1,6 @@
 #pragma once
-#include <SDL.h>
 #include "Camera.h"
+#include "Animator.h"
 
 enum EntityType {
     PLAYER,
@@ -9,15 +9,21 @@ enum EntityType {
     NPC
 };
 
+enum class Direction {
+    Left,
+    Right
+};
+
 class Entity {
 public:
     int x, y;
     int width, height;
     EntityType type;
+    Direction direction = Direction::Right;
 
     bool CheckCollision(Entity& other);
     SDL_Texture* texture = nullptr;
+    Animator* animator = nullptr;
 
-    void Update();
     void Render(SDL_Renderer* renderer, Camera camera);
 };

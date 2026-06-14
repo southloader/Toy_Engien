@@ -54,3 +54,22 @@
 - SceneManager 도입
 - ResourceManager 설계
 - Texture / Sprite 렌더링 시스템 추가
+
+## 개발 기록
+### 2026-06-14
+
+#### Animation System 추가
+
+- Animation 클래스 구현
+- 프레임 기반 애니메이션 재생 기능 추가
+- 애니메이션별 재생 속도 설정 지원
+
+#### Animator 시스템 추가
+
+- 여러 Animation 관리 기능 구현
+- 이름 기반 애니메이션 전환 지원
+
+```cpp
+animator.Play("Idle");
+animator.Play("Walk");
+animator.Play("Run");

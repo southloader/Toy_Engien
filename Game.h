@@ -11,7 +11,6 @@ enum class GameState {
     MainMenu,
     Playing,
     ExitConfirm
-
 };
 
 class Game {
@@ -21,7 +20,6 @@ public:
     void Update();
     void Render();
     void Clean();
-    void RenderText(SDL_Renderer* renderer, TTF_Font* font, const char* text, int x, int y);
     void ShowExitConfirm();
     bool running;
 
@@ -29,7 +27,6 @@ private:
     Scene* currentScene;
     SceneManager sceneManager;
     std::vector<Entity> entities;
-    std::vector<std::vector<int>> map;
     int tileSize;
 
     SDL_Window* window;
