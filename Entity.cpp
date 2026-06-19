@@ -14,13 +14,11 @@ void Entity::Render(SDL_Renderer* renderer, Camera camera){
         flip = SDL_FLIP_HORIZONTAL;
     }
 
-    if (animator != nullptr) {
-        SDL_Texture* frame = animator->GetCurrentFrame();
+    SDL_Texture* frame = animator.GetCurrentFrame();
 
-        if (frame != nullptr) {
-            SDL_RenderCopyEx(renderer, frame, nullptr, &dst, 0, nullptr, flip);
-            return;
-        }
+    if (frame != nullptr) {
+        SDL_RenderCopyEx(renderer, frame, nullptr, &dst, 0, nullptr, flip);
+        return;
     }
 
     if (texture != nullptr) {

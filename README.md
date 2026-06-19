@@ -123,3 +123,23 @@ animator.Play("Idle");
 animator.Play("Walk");
 animator.Play("Run");
 ```
+## 개발 기록
+### 2026-06-19
+
+#### NPC Behavior System
+
+NPC 행동 시스템 추가
+
+지원 행동:
+
+- Idle
+- Patrol
+- FollowPlayer
+
+예시:
+
+```cpp
+guard.SetBehavior(NPCBehavior::Patrol);
+
+companion.SetBehavior(NPCBehavior::FollowPlayer);
+```

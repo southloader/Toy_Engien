@@ -24,7 +24,7 @@ void Game::Init() {
 
     //텍스처 매니저
     textureManager = new TextureManager(renderer);
-    textureManager->LoadTexture("Npc", "assets/npc.png");
+    textureManager->LoadTexture("npc_idle", "assets/npc.png");
     textureManager->LoadTexture("player", "assets/player.png");
     textureManager->LoadTexture("wall", "assets/brickWall.png");
     textureManager->LoadTexture("player_walk1" , "assets/player_walk1.png");
@@ -33,6 +33,9 @@ void Game::Init() {
     textureManager->LoadTexture("player_run1", "assets/player_run1.png");
     textureManager->LoadTexture("player_run2", "assets/player_run2.png");
     textureManager->LoadTexture("player_run3", "assets/player_run3.png");
+    textureManager->LoadTexture("npc_walk_1", "assets/player_walk1.png");
+    textureManager->LoadTexture("npc_walk_2", "assets/player_walk2.png");
+    textureManager->LoadTexture("npc_walk_3", "assets/player_walk3.png");
 
     //플레이어와 적을 생성. 엔티티들은 엔티티 벡터에 저장.
     for(int i = 0; i < 5; i++){
@@ -61,7 +64,7 @@ void Game::Init() {
 
     //씬 구성
     sceneManager.AddScene("MainMenu", new MainMenuScene(font));
-    sceneManager.AddScene("Play", new PlayScene(textureManager));
+    sceneManager.AddScene("Play", new PlayScene(textureManager, font));
     sceneManager.AddScene("Pause", new PauseScene(font));
 
     sceneManager.ChangeScene("MainMenu");

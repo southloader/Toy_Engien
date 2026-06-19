@@ -6,7 +6,7 @@ enum EntityType {
     PLAYER,
     ENEMY,
     OBJ,
-    NPC
+    NPC_TYPE
 };
 
 enum class Direction {
@@ -23,7 +23,7 @@ public:
 
     bool CheckCollision(Entity& other);
     SDL_Texture* texture = nullptr;
-    Animator* animator = nullptr;
+    Animator animator;
 
     void Render(SDL_Renderer* renderer, Camera camera);
 };

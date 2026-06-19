@@ -1,7 +1,9 @@
 #include "PlayScene.h"
 
-PlayScene::PlayScene(TextureManager* textureManager) {
+PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font) {
     this->textureManager = textureManager;
+    this->font = font;
+
     request = SceneRequest::None;
 
     camera.x = 0;
@@ -11,21 +13,25 @@ PlayScene::PlayScene(TextureManager* textureManager) {
 
     tileMap = new TileMap(textureManager);
     tileMap->Init();
+
     InitEntities();
+    InitNPCs();
 }
 
 void PlayScene::InitEntities() {
+
+    Entity player;
     Animation idle;
     idle.AddFrame(textureManager->GetTexture("player"));
     idle.SetFrameDelay(1000);
-    playerAnimator.AddAnimation("Idle", idle);
+    player.animator.AddAnimation("Idle", idle);
     
     Animation walk;
     walk.AddFrame(textureManager->GetTexture("player_walk1"));
     walk.AddFrame(textureManager->GetTexture("player_walk2"));
     walk.AddFrame(textureManager->GetTexture("player_walk3"));
     walk.SetFrameDelay(150);
-    playerAnimator.AddAnimation("Walk", walk);
+    player.animator.AddAnimation("Walk", walk);
 
     Animation run;
     run.AddFrame(textureManager->GetTexture("player_run1"));
@@ -33,36 +39,146 @@ void PlayScene::InitEntities() {
     run.AddFrame(textureManager->GetTexture("player_run3"));
     run.AddFrame(textureManager->GetTexture("player_run2"));
     run.SetFrameDelay(100);
-    playerAnimator.AddAnimation("Run", run);
+    player.animator.AddAnimation("Run", run);
 
-    playerAnimator.Play("Idle");
-
-    Entity player;
+    player.animator.Play("Idle");
     player.x = 100;
     player.y = 100;
     player.width = 50;
     player.height = 50;
     player.type = PLAYER;
-    player.animator = &playerAnimator;
 
     entities.push_back(player);
+}
 
-    Entity npc;
-    npc.x = 300;
-    npc.y = 200;
-    npc.width = 50;
-    npc.height = 50;
-    npc.type = NPC;
-    npc.texture = textureManager->GetTexture("Npc");
+Entity* PlayScene::GetPlayer() {
+    for (auto& e : entities) {
+        if (e.type == PLAYER) {
+            return &e;
+        }
+    }
 
-    entities.push_back(npc);
+    return nullptr;
+}
 
+void PlayScene::InitNPCs() {
+    NPC villager;
+
+    villager.SetName("주민");
+    villager.SetPosition(300, 200);
+    villager.SetSize(50,50);
+    villager.SetTexture(textureManager->GetTexture("npc_idle"));
+
+    villager.SetDialogue({
+        "안녕하세요",
+        "저는 주민입니다.",
+        "주민, 다음주민, 이번주민, 격주민",
+        "감사합니다. 땡큐",
+        "장난이고, E 키를 누르면 대화할 수 있어요."
+    });
+    npcs.push_back(villager);
+
+    NPC guard;
+
+    guard.SetName("순찰병");
+    guard.SetPosition(300, 100);
+    guard.SetSize(50, 50);
+    guard.SetTexture(textureManager->GetTexture("npc_idle"));
+
+    Animation guardIdle;
+    guardIdle.AddFrame(textureManager->GetTexture("npc_idle"));
+    guardIdle.SetFrameDelay(1000);
+
+    Animation guardWalk;
+    guardWalk.AddFrame(textureManager->GetTexture("npc_walk_1"));
+    guardWalk.AddFrame(textureManager->GetTexture("npc_walk_2"));
+    guardWalk.AddFrame(textureManager->GetTexture("npc_walk_3"));
+    guardWalk.SetFrameDelay(150);
+
+    guard.GetEntity().animator.AddAnimation("Idle", guardIdle);
+    guard.GetEntity().animator.AddAnimation("Walk", guardWalk);
+    guard.GetEntity().animator.Play("Idle");
+
+    guard.SetDialogue({
+        "나는 순찰 중입니다.",
+        "마을은 안전합니다."
+    });
+
+    guard.SetBehavior(NPCBehavior::Patrol);
+    guard.SetPatrolPoints({
+        {300, 100},
+        {600, 100}
+    });
+    guard.SetMoveSpeed(2);
+    
+    npcs.push_back(guard);
+
+
+    NPC companion;
+
+    companion.SetName("동료");
+    companion.SetPosition(150, 200);
+    companion.SetSize(50, 50);
+    companion.SetTexture(textureManager->GetTexture("npc_idle"));
+
+    Animation companionIdle;
+    companionIdle.AddFrame(textureManager->GetTexture("npc_idle"));
+    companionIdle.SetFrameDelay(1000);
+
+    Animation companionWalk;
+    companionWalk.AddFrame(textureManager->GetTexture("npc_walk_1"));
+    companionWalk.AddFrame(textureManager->GetTexture("npc_walk_2"));
+    companionWalk.AddFrame(textureManager->GetTexture("npc_walk_3"));
+    companionWalk.SetFrameDelay(150);
+
+    companion.GetEntity().animator.AddAnimation("Idle", companionIdle);
+    companion.GetEntity().animator.AddAnimation("Walk", companionWalk);
+    companion.GetEntity().animator.Play("Idle");
+
+    companion.SetDialogue({
+        "제가 따라갈게요.",
+        "너무 빨리 가지 마세요!"
+    });
+
+    companion.SetBehavior(NPCBehavior::FollowPlayer);
+    companion.SetMoveSpeed(3);
+    
+
+    npcs.push_back(companion);
 }
 
 void PlayScene::HandleEvents(SDL_Event& event) {
     if (event.type == SDL_KEYDOWN) {
         if (event.key.keysym.sym == SDLK_ESCAPE) {
             request = SceneRequest::GoToPause;
+        }
+        if (event.key.keysym.sym == SDLK_e){
+            if (dialogueBox.IsVisible()) {
+                dialogueBox.Next();
+            }
+            else {
+                CheckNPCInteraction();
+            }
+        }
+    }
+}
+
+void PlayScene::CheckNPCInteraction() {
+    Entity* player = nullptr;
+
+    for (auto& e : entities) {
+        if (e.type == PLAYER) {
+            player = &e;
+            break;
+        }
+    }
+
+    if (player == nullptr) return;
+
+    for (auto& npc : npcs) {
+        if (IsNear(*player, npc.GetEntity(), 80)) {
+            dialogueBox.Show(npc.GetName(), npc.GetDialogue());
+            return;
         }
     }
 }
@@ -87,7 +203,11 @@ void PlayScene::MoveAndCollideY(Entity& entity, int moveY) {
 }
 
 void PlayScene::Update() {
+    Entity* player = GetPlayer();
     UpdatePlayer();
+    for(auto& npc : npcs){
+        npc.Update(player);
+    }
 }
 
 void PlayScene::UpdatePlayer() {
@@ -123,16 +243,16 @@ void PlayScene::UpdatePlayer() {
         bool isRunning = keyState[SDL_SCANCODE_LSHIFT];
 
         if (!isMoving) {
-            playerAnimator.Play("Idle");
+            e.animator.Play("Idle");
         }
         else if (isRunning) {
-            playerAnimator.Play("Run");
+            e.animator.Play("Run");
         }
         else {
-            playerAnimator.Play("Walk");
+            e.animator.Play("Walk");
         }
 
-        playerAnimator.Update();
+        e.animator.Update();
 
         UpdateCamera(e);
     }
@@ -165,6 +285,11 @@ void PlayScene::Render(SDL_Renderer* renderer) {
     for (auto& e : entities) {
         e.Render(renderer, camera);
     }
+    for (auto& npc : npcs) {
+        npc.Render(renderer, camera);
+    }
+
+    dialogueBox.Render(renderer, font);
 }
 
 SceneRequest PlayScene::GetRequest() {
@@ -173,6 +298,19 @@ SceneRequest PlayScene::GetRequest() {
 
 void PlayScene::ClearRequest() {
     request = SceneRequest::None;
+}
+
+bool PlayScene::IsNear(Entity& a, Entity& b, int distance) {
+    int ax = a.x + a.width / 2;
+    int ay = a.y + a.height / 2;
+
+    int bx = b.x + b.width / 2;
+    int by = b.y + b.height / 2;
+
+    int dx = ax - bx;
+    int dy = ay - by;
+
+    return dx * dx + dy * dy <= distance * distance;
 }
 
 PlayScene::~PlayScene() {

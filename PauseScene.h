@@ -16,7 +16,6 @@ public:
 
     SceneRequest GetRequest() override;
     void ClearRequest() override;
-
 private:
     UIManager uiManager;
     SceneRequest request;
