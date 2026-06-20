@@ -10,6 +10,7 @@
 #include "Camera.h"
 #include "NPC.h"
 #include "DialogueBox.h"
+#include "Inventory.h"
 
 class PlayScene : public Scene {
 public:
@@ -34,6 +35,7 @@ private:
     std::vector<NPC> npcs;
     DialogueBox dialogueBox;
     TTF_Font* font;
+    Inventory inventory;
     
     int playerSpeed = 3;
 

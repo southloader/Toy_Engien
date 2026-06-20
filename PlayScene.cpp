@@ -1,4 +1,5 @@
 #include "PlayScene.h"
+#include <cstdio>
 
 PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font) {
     this->textureManager = textureManager;
@@ -160,6 +161,32 @@ void PlayScene::HandleEvents(SDL_Event& event) {
                 CheckNPCInteraction();
             }
         }
+        if (event.type == SDL_KEYDOWN) {
+            if (event.key.keysym.sym == SDLK_i) {
+                inventory.AddItem("Potion");
+                inventory.PrintItems();
+            }
+        }       
+        if (event.key.keysym.sym == SDLK_1) {
+            dialogueBox.SelectChoice(0);
+        }
+        if (event.key.keysym.sym == SDLK_2) {
+            dialogueBox.SelectChoice(1);
+        }
+        if (event.key.keysym.sym == SDLK_3) {
+            dialogueBox.SelectChoice(2);
+        }
+    }
+    DialogueAction action = dialogueBox.GetRequest();
+
+    if(action == DialogueAction::OpenShop) {
+        request = SceneRequest::OpenShop;
+        dialogueBox.Hide();
+        dialogueBox.ClearRequest();
+    }
+    if(action == DialogueAction::CloseDialogue) {
+        dialogueBox.Hide();
+        dialogueBox.ClearRequest();
     }
 }
 
@@ -177,7 +204,27 @@ void PlayScene::CheckNPCInteraction() {
 
     for (auto& npc : npcs) {
         if (IsNear(*player, npc.GetEntity(), 80)) {
-            dialogueBox.Show(npc.GetName(), npc.GetDialogue());
+            dialogueBox.ShowChoices(
+                npc.GetName(),
+                "무엇을 도와드릴까요?",
+                {
+                    {
+                        "마을에 대해 묻는다",
+                        "이 마을은 오래된 항구 마을입니다.",
+                        DialogueAction::ShowText
+                    },
+                    {
+                        "상점 열기",
+                        "상점을 여는 중 ...",
+                        DialogueAction::OpenShop
+                    },
+                    {
+                        "떠난다",
+                        "다음에 또 오세요.",
+                        DialogueAction::CloseDialogue
+                    }
+                }
+            );
             return;
         }
     }

@@ -32,7 +32,6 @@ void NPC::SetDialogue(const std::vector<std::string>& lines) {
     dialogueLines = lines;
 }
 
-
 void NPC::Update(Entity* player) {
     int oldX = entity.x;
     int oldY = entity.y;

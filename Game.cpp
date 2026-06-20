@@ -66,6 +66,7 @@ void Game::Init() {
     sceneManager.AddScene("MainMenu", new MainMenuScene(font));
     sceneManager.AddScene("Play", new PlayScene(textureManager, font));
     sceneManager.AddScene("Pause", new PauseScene(font));
+    sceneManager.AddScene("Shop", new ShopScene(font, &gameData));
 
     sceneManager.ChangeScene("MainMenu");
 }

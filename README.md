@@ -143,3 +143,8 @@ guard.SetBehavior(NPCBehavior::Patrol);
 
 companion.SetBehavior(NPCBehavior::FollowPlayer);
 ```
+
+## 개발 기록
+### 2026-06-20
+
+NPC 선택형 대화 시스템 추가 및 인벤토리 시스템 기반 추가

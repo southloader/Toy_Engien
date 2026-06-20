@@ -6,6 +6,8 @@
 #include "MainMenuScene.h"
 #include "PlayScene.h"
 #include "PauseScene.h"
+#include "ShopScene.h"
+#include "GameData.h"
 
 enum class GameState {
     MainMenu,
@@ -36,4 +38,5 @@ private:
     Camera camera;
     UIManager uiManager;
     GameState currState;
+    GameData gameData;
 };

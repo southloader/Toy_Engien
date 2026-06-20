@@ -14,6 +14,8 @@ void DialogueBox::Hide() {
 void DialogueBox::Next() {
     if (!visible) return;
 
+    if(hasChoices) return;
+
     currentLine++;
 
     if (currentLine >= dialogueLines.size()) {
@@ -25,24 +27,39 @@ bool DialogueBox::IsVisible() {
     return visible;
 }
 
-void RenderText(SDL_Renderer* renderer, TTF_Font* font, const std::string& text, int x, int y) {
-    SDL_Color color = {255, 255, 255, 255};
+DialogueAction DialogueBox::GetRequest() {
+    return request;
+}
 
-    SDL_Surface* surface = TTF_RenderUTF8_Blended(font, text.c_str(), color);
-    if (!surface) return;
+void DialogueBox::ClearRequest() {
+    request = DialogueAction::None;
+}
 
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-    if (!texture) {
-        SDL_FreeSurface(surface);
-        return;
-    }
+void DialogueBox::ShowChoices(const std::string& speaker, const std::string& line, const std::vector<DialogueChoice>& choices){
+    speakerName = speaker;
 
-    SDL_Rect dst = {x, y, surface->w, surface->h};
+    dialogueLines.clear();
+    dialogueLines.push_back(line);
 
-    SDL_RenderCopy(renderer, texture, nullptr, &dst);
+    this->choices = choices;
 
-    SDL_FreeSurface(surface);
-    SDL_DestroyTexture(texture);
+    currentLine = 0;
+    visible = true;
+    hasChoices = true;
+}
+
+void DialogueBox::SelectChoice(int index){
+    if(!visible) return;
+    if(!hasChoices) return;
+    if(index <0 || index >= choices.size()) return;
+
+    dialogueLines.clear();
+    dialogueLines.push_back(choices[index].result);
+    request = choices[index].action;
+
+    choices.clear();
+    hasChoices = false;
+    currentLine = 0;
 }
 
 void DialogueBox::Render(SDL_Renderer* renderer, TTF_Font* font) {
@@ -52,7 +69,19 @@ void DialogueBox::Render(SDL_Renderer* renderer, TTF_Font* font) {
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
-    SDL_Rect box = {50, 420, 700, 140};
+    int boxX = 50;
+    int boxWidth = 700;
+    int padding = 20;
+    int lineHeight = 30;
+    int boxHeight = 100;
+
+    if (hasChoices) {
+        boxHeight += choices.size() * lineHeight;
+    }
+
+    int boxY = 600 - boxHeight - 40;
+
+    SDL_Rect box = { boxX, boxY, boxWidth, boxHeight};
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 210);
     SDL_RenderFillRect(renderer, &box);
@@ -60,6 +89,16 @@ void DialogueBox::Render(SDL_Renderer* renderer, TTF_Font* font) {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, &box);
 
-    RenderText(renderer, font, speakerName, 80, 440);
-    RenderText(renderer, font, dialogueLines[currentLine], 80, 485);
+    RenderText(renderer, font, speakerName, boxX + padding, boxY + padding);
+    RenderText(renderer, font, dialogueLines[currentLine], boxX + padding, boxY + padding + 40);
+
+    if (hasChoices) {
+        int choiceStartY = boxY + padding + 80;
+
+        for (int i = 0; i < choices.size(); i++) {
+            std::string choiceText = std::to_string(i + 1) + ". " + choices[i].text;
+
+            RenderText(renderer, font, choiceText, boxX + padding + 10, choiceStartY + i * lineHeight);
+        }
+    }
 }

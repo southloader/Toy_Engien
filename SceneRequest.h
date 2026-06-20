@@ -5,5 +5,7 @@ enum class SceneRequest {
     GoToMainMenu,
     GoToPlay,
     GoToPause,
+    OpenShop,
+    CloseOverlay,
     ExitGame
 };

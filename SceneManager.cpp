@@ -45,6 +45,12 @@ void SceneManager::ProcessRequest(bool& running) {
     else if (request == SceneRequest::GoToPause) {
         PushOverlay("Pause");
     }
+    else if (request == SceneRequest::OpenShop) {
+        PushOverlay("Shop");
+    }
+    else if (request == SceneRequest::CloseOverlay) {
+        PopOverlay();
+    }
     else if (request == SceneRequest::ExitGame) {
         running = false;
     }
