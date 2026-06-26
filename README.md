@@ -148,3 +148,99 @@ companion.SetBehavior(NPCBehavior::FollowPlayer);
 ### 2026-06-20
 
 NPC 선택형 대화 시스템 추가 및 인벤토리 시스템 기반 추가
+
+## 개발기록
+### 2026-06-26
+
+### Inventory & Item System Refactoring
+
+#### Item System
+
+* `Item` 구조체 도입
+* `id`, `name`, `description` 기반의 아이템 데이터 관리
+* 문자열 기반 인벤토리에서 `Item` 객체 기반 인벤토리로 변경
+
+#### ItemDatabase
+
+* `ItemDatabase` 시스템 추가
+* 아이템을 ID로 조회하는 방식으로 변경
+
+```cpp
+ItemDatabase::Get("potion");
+```
+
+* 상점 및 게임 시스템에서 동일한 아이템 데이터를 공유하도록 구조 개선
+
+#### Inventory Refactoring
+
+* `InventorySlot` 구조체 추가
+
+```cpp
+struct InventorySlot
+{
+    Item item;
+    int count;
+};
+```
+
+* 같은 아이템 구매 시 새로운 슬롯을 생성하지 않고 수량 증가
+* 아이템 제거 시 수량 감소 후 0개가 되면 슬롯 삭제
+* `GetItems()`를 `GetSlots()`로 변경하여 수량 정보까지 제공
+
+#### Inventory UI
+
+* `InventoryScene` Overlay 추가
+* `I` 키로 인벤토리 열기/닫기
+* 게임 화면 위에 오버레이 형태로 표시
+* 인벤토리 아이템 목록을 실시간으로 렌더링
+* 아이템 수량(`Potion x3`) 표시 지원
+
+#### GameData
+
+* `Inventory`를 `GameData`로 이동
+* 여러 Scene이 동일한 게임 데이터를 공유하도록 구조 개선
+
+```cpp
+GameData
+├── Inventory
+└── Gold
+```
+
+#### Shop Integration
+
+* 상점 구매 시 `ItemDatabase`를 통해 아이템 획득
+* 구매한 아이템이 즉시 Inventory에 반영
+* Inventory UI에서도 실시간 확인 가능
+
+---
+
+### Architecture Improvement
+
+기존 구조
+
+```
+Inventory
+└── std::vector<Item>
+```
+
+변경 후
+
+```
+ItemDatabase
+        │
+        ▼
+      Item
+        │
+        ▼
+ InventorySlot
+ ├── Item
+ └── Count
+        │
+        ▼
+    Inventory
+        │
+        ▼
+ InventoryScene
+```
+
+아이템 정의(Item)와 인벤토리 상태(InventorySlot)를 분리하여 확장성과 유지보수성을 개선하였다.

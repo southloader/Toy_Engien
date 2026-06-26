@@ -1,9 +1,10 @@
 #include "PlayScene.h"
 #include <cstdio>
 
-PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font) {
+PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData) {
     this->textureManager = textureManager;
     this->font = font;
+    this->gameData = gameData;
 
     request = SceneRequest::None;
 
@@ -163,8 +164,7 @@ void PlayScene::HandleEvents(SDL_Event& event) {
         }
         if (event.type == SDL_KEYDOWN) {
             if (event.key.keysym.sym == SDLK_i) {
-                inventory.AddItem("Potion");
-                inventory.PrintItems();
+                request = SceneRequest::OpenInventory;
             }
         }       
         if (event.key.keysym.sym == SDLK_1) {

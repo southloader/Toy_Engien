@@ -1,17 +1,17 @@
 #pragma once
 
-#include <string>
+#include "Item.h"
+#include "InventorySlot.h"
 #include <vector>
 
 class Inventory {
 public:
-    void AddItem(const std::string& itemName);
-    bool HasItem(const std::string& itemName);
-    void RemoveItem(const std::string& itemName);
+    void AddItem(const Item& item);
+    bool HasItem(const std::string& id);
+    bool RemoveItem(const std::string& id);
 
-    void PrintItems();
+    const std::vector<InventorySlot>& GetInventory() const;
 
 private:
-    std::vector<std::string> items;
-
+    std::vector<InventorySlot> slots;
 };

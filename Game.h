@@ -7,6 +7,7 @@
 #include "PlayScene.h"
 #include "PauseScene.h"
 #include "ShopScene.h"
+#include "InventoryScene.h"
 #include "GameData.h"
 
 enum class GameState {

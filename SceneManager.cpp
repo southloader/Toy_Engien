@@ -48,6 +48,9 @@ void SceneManager::ProcessRequest(bool& running) {
     else if (request == SceneRequest::OpenShop) {
         PushOverlay("Shop");
     }
+    else if (request == SceneRequest::OpenInventory) {
+        PushOverlay("Inventory");
+    }
     else if (request == SceneRequest::CloseOverlay) {
         PopOverlay();
     }

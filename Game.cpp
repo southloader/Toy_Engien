@@ -1,5 +1,6 @@
 #include "Game.h"
 
+
 //Game 생성자
 void Game::Init() {
     //작동 트리거 true
@@ -37,6 +38,9 @@ void Game::Init() {
     textureManager->LoadTexture("npc_walk_2", "assets/player_walk2.png");
     textureManager->LoadTexture("npc_walk_3", "assets/player_walk3.png");
 
+    //아이템 데이터 베이스 초기화
+    ItemDatabase::Init();
+
     //플레이어와 적을 생성. 엔티티들은 엔티티 벡터에 저장.
     for(int i = 0; i < 5; i++){
         Entity e;
@@ -64,10 +68,10 @@ void Game::Init() {
 
     //씬 구성
     sceneManager.AddScene("MainMenu", new MainMenuScene(font));
-    sceneManager.AddScene("Play", new PlayScene(textureManager, font));
+    sceneManager.AddScene("Play", new PlayScene(textureManager, font, &gameData));
     sceneManager.AddScene("Pause", new PauseScene(font));
     sceneManager.AddScene("Shop", new ShopScene(font, &gameData));
-
+    sceneManager.AddScene("Inventory", new InventoryScene(font, &gameData));
     sceneManager.ChangeScene("MainMenu");
 }
 

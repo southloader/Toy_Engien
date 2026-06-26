@@ -2,16 +2,15 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <string>
 
 #include "Scene.h"
 #include "UIManager.h"
 #include "GameData.h"
-#include "TextRenderer.h"
-#include "ItemDatabase.h"
 
-class ShopScene : public Scene {
+class InventoryScene : public Scene {
 public:
-    ShopScene(TTF_Font* font, GameData* gameData);
+    InventoryScene(TTF_Font* font, GameData* gameData);
 
     void Update() override;
     void Render(SDL_Renderer* renderer) override;
@@ -19,7 +18,6 @@ public:
 
     SceneRequest GetRequest() override;
     void ClearRequest() override;
-    void BuyItem(const Item& item, int price);
 
 private:
     UIManager uiManager;

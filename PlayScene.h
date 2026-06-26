@@ -10,11 +10,11 @@
 #include "Camera.h"
 #include "NPC.h"
 #include "DialogueBox.h"
-#include "Inventory.h"
+#include "GameData.h"
 
 class PlayScene : public Scene {
 public:
-    PlayScene(TextureManager* textureManager, TTF_Font* font);
+    PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData);
     ~PlayScene();
 
     void Update() override;
@@ -35,7 +35,7 @@ private:
     std::vector<NPC> npcs;
     DialogueBox dialogueBox;
     TTF_Font* font;
-    Inventory inventory;
+    GameData* gameData;
     
     int playerSpeed = 3;
 

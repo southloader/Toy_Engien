@@ -68,12 +68,12 @@ void ShopScene::Render(SDL_Renderer* renderer){
     uiManager.Render(renderer, font);  
 }
 
-void ShopScene::BuyItem(const std::string& itemName, int price){
+void ShopScene::BuyItem(const Item& item, int price){
     if (gameData->gold >= price) {
         gameData->gold -= price;
-        gameData->inventory.AddItem(itemName);
+        gameData->inventory.AddItem(item);
 
-        printf("Bought %s for %dG\n",itemName.c_str(), price);
+        printf("Bought %s for %dG\n",item.name.c_str(), price);
         printf("Gold left: %d\n", gameData->gold);
     }
     else {
@@ -89,10 +89,10 @@ void ShopScene::HandleEvents(SDL_Event& event) {
         std::string clickedId = uiManager.GetClickedButtonId(mouseX, mouseY);
         
         if (clickedId == "potion") {
-            BuyItem("Potion", 50);
+            BuyItem(ItemDatabase::Get("potion"), 50);
         }
         else if (clickedId == "sword") {
-            BuyItem("Old Sword", 100);
+            BuyItem(ItemDatabase::Get("old_sword"), 100);
         }
         else if (clickedId == "close") {
             request = SceneRequest::CloseOverlay;

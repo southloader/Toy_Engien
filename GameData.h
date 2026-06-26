@@ -5,5 +5,5 @@
 class GameData {
 public:
     Inventory inventory;
-    int gold = 100;
+    int gold = 500;
 };
