@@ -11,15 +11,17 @@
 #include "NPC.h"
 #include "DialogueBox.h"
 #include "GameData.h"
+#include "QuestManager.h"
 
 class PlayScene : public Scene {
 public:
-    PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData);
+    PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager);
     ~PlayScene();
 
     void Update() override;
     void Render(SDL_Renderer* renderer) override;
     void HandleEvents(SDL_Event& event) override;
+    void ProcessDialogueAction();
 
     bool IsNear(Entity& a, Entity& b, int distance);
     SceneRequest GetRequest() override;
@@ -36,6 +38,7 @@ private:
     DialogueBox dialogueBox;
     TTF_Font* font;
     GameData* gameData;
+    QuestManager* questManager;
     
     int playerSpeed = 3;
 

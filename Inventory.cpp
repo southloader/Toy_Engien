@@ -50,6 +50,14 @@ bool Inventory::RemoveItem(const std::string& id) {
     printf("Item not found: %s\n", id.c_str());
     return false;
 }
+const InventorySlot* Inventory::GetSlot(const std::string& id) const {
+    for (auto& slot : slots) {
+        if (slot.item.id == id) {
+            return &slot;
+        }
+    }
+    return nullptr;
+};
 
 const std::vector<InventorySlot>& Inventory::GetInventory() const {
     return slots;

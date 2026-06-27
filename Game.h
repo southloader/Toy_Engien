@@ -9,6 +9,7 @@
 #include "ShopScene.h"
 #include "InventoryScene.h"
 #include "GameData.h"
+#include "QuestManager.h"
 
 enum class GameState {
     MainMenu,
@@ -40,4 +41,5 @@ private:
     UIManager uiManager;
     GameState currState;
     GameData gameData;
+    QuestManager* questManager;
 };

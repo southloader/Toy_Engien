@@ -31,8 +31,13 @@ DialogueAction DialogueBox::GetRequest() {
     return request;
 }
 
+std::string DialogueBox::GetRequestedQuestId() {
+    return requestedQuestId;
+}
+
 void DialogueBox::ClearRequest() {
     request = DialogueAction::None;
+    requestedQuestId = "";
 }
 
 void DialogueBox::ShowChoices(const std::string& speaker, const std::string& line, const std::vector<DialogueChoice>& choices){
@@ -55,7 +60,9 @@ void DialogueBox::SelectChoice(int index){
 
     dialogueLines.clear();
     dialogueLines.push_back(choices[index].result);
+    
     request = choices[index].action;
+    requestedQuestId = choices[index].questId;
 
     choices.clear();
     hasChoices = false;

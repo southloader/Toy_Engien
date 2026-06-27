@@ -12,6 +12,7 @@ struct DialogueChoice {
     std::string text;
     std::string result;
     DialogueAction action = DialogueAction::None;
+    std::string questId = "";
 };
 
 class DialogueBox{
@@ -23,7 +24,7 @@ public:
     
     void ShowChoices(const std::string& speaker, const std::string& line, const std::vector<DialogueChoice>& choices);
     void SelectChoice(int index);
-
+    std::string GetRequestedQuestId();
     DialogueAction GetRequest();
     void ClearRequest();
 
@@ -37,5 +38,6 @@ private:
     int currentLine = 0;
     std::vector<DialogueChoice> choices;
     bool hasChoices = false;
+    std::string requestedQuestId;
 
 };

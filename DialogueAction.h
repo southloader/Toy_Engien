@@ -5,5 +5,7 @@ enum class DialogueAction {
     ShowText,
     CloseDialogue,
     OpenShop,
-    StartQuest
+    StartQuest,
+    AcceptQuest,
+    CompleteQuest
 };

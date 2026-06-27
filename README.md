@@ -244,3 +244,277 @@ ItemDatabase
 ```
 
 아이템 정의(Item)와 인벤토리 상태(InventorySlot)를 분리하여 확장성과 유지보수성을 개선하였다.
+
+# Development Log
+
+## Quest System (Phase 1)
+
+### Quest Core
+
+* `Quest` 구조체 추가
+* `QuestState` 도입
+
+```cpp
+Available
+Active
+Completed
+```
+
+* 퀘스트 목표 및 보상 정보 추가
+
+```cpp
+QuestType type;
+
+std::string targetId;
+
+int targetCount;
+
+std::string rewardItemId;
+
+int rewardAmount;
+```
+
+---
+
+### QuestLog
+
+플레이어가 현재 보유 중인 퀘스트를 관리하는 시스템 구현.
+
+지원 기능:
+
+```cpp
+AddQuest()
+
+HasQuest()
+
+GetQuest()
+
+GetQuests()
+```
+
+---
+
+### QuestManager
+
+Quest 관련 로직을 `QuestManager` 로 분리.
+
+AI 친화적인 API를 목표로 설계.
+
+```cpp
+questManager.AcceptQuest(id);
+
+questManager.CanComplete(id);
+
+questManager.CompleteQuest(id);
+
+questManager.GiveReward(id);
+```
+
+QuestLog는 상태 저장만 담당하고,
+
+QuestManager는 퀘스트 진행 및 보상 처리를 담당하도록 역할 분리.
+
+---
+
+### QuestResult
+
+퀘스트 완료 결과를 반환하는 시스템 추가.
+
+```cpp
+enum class QuestResult
+{
+    Success,
+
+    ConditionNotMet,
+
+    AlreadyCompleted,
+
+    QuestNotFound
+};
+```
+
+이를 통해 단순 bool 반환 대신 상태 기반 처리가 가능해짐.
+
+```cpp
+QuestResult result =
+    questManager.CompleteQuest(id);
+```
+
+---
+
+### Inventory Integration
+
+퀘스트 완료 조건 확인 시 Inventory 데이터를 조회하도록 구현.
+
+```cpp
+const InventorySlot* slot =
+    inventory.GetSlot("potion");
+```
+
+읽기 전용 접근 방식을 사용하여 Inventory 상태가 외부에서 수정되지 않도록 제한.
+
+```cpp
+const InventorySlot*
+Inventory::GetSlot(
+    const std::string& id
+) const;
+```
+
+---
+
+### Dialogue Integration
+
+기존 Dialogue 시스템과 Quest 시스템 연결.
+
+새로운 DialogueAction 추가.
+
+```cpp
+AcceptQuest
+
+CompleteQuest
+```
+
+선택지에서 Quest ID를 전달할 수 있도록 개선.
+
+```cpp
+DialogueChoice
+{
+    text,
+    resultText,
+
+    action,
+
+    questId
+}
+```
+
+---
+
+### Quest Dialogue
+
+Quest 데이터 내부에 상태별 대사 추가.
+
+```cpp
+acceptDialogue
+
+progressDialogue
+
+completeDialogue
+
+alreadyCompletedDialogue
+```
+
+예시:
+
+```cpp
+quest.acceptDialogue =
+{
+    "좋아요.",
+    "포션 3개를 가져와 주세요."
+};
+
+quest.progressDialogue =
+{
+    "아직 부족해요.",
+    "포션이 3개 필요합니다."
+};
+
+quest.completeDialogue =
+{
+    "좋아요!",
+    "여기 보수입니다."
+};
+
+quest.alreadyCompletedDialogue =
+{
+    "이미 도와주셨어요."
+};
+```
+
+---
+
+### NPC Interaction
+
+NPC 선택지를 통해 퀘스트 수락 및 완료 가능.
+
+```text
+NPC
+
+↓
+
+Dialogue
+
+↓
+
+AcceptQuest
+
+↓
+
+QuestManager
+
+↓
+
+Inventory Check
+
+↓
+
+CompleteQuest
+
+↓
+
+Reward
+
+↓
+
+Dialogue Feedback
+```
+
+---
+
+## Architecture Update
+
+```text
+ItemDatabase
+        │
+
+Inventory
+        │
+
+QuestLog
+        │
+
+QuestManager
+        │
+
+Dialogue
+        │
+
+NPC
+```
+
+Quest 데이터를 단순 저장 구조에서 관리 시스템으로 승격.
+
+QuestManager를 통해 AI 친화적인 고수준 API 제공.
+
+```cpp
+questManager.AcceptQuest(
+    "collect_potion"
+);
+
+questManager.CompleteQuest(
+    "collect_potion"
+);
+```
+
+---
+
+## Next Goals
+
+Planned Features
+
+* QuestDatabase
+* Quest Overlay UI
+* Dynamic NPC Dialogue
+* Multiple Quest Types
+* Save / Load System
+* EventManager

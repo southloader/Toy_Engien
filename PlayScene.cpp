@@ -1,10 +1,11 @@
 #include "PlayScene.h"
 #include <cstdio>
 
-PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData) {
+PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager) {
     this->textureManager = textureManager;
     this->font = font;
     this->gameData = gameData;
+    this->questManager = questManager;
 
     request = SceneRequest::None;
 
@@ -162,11 +163,9 @@ void PlayScene::HandleEvents(SDL_Event& event) {
                 CheckNPCInteraction();
             }
         }
-        if (event.type == SDL_KEYDOWN) {
-            if (event.key.keysym.sym == SDLK_i) {
-                request = SceneRequest::OpenInventory;
-            }
-        }       
+        if (event.key.keysym.sym == SDLK_i) {
+            request = SceneRequest::OpenInventory;
+        }
         if (event.key.keysym.sym == SDLK_1) {
             dialogueBox.SelectChoice(0);
         }
@@ -177,17 +176,57 @@ void PlayScene::HandleEvents(SDL_Event& event) {
             dialogueBox.SelectChoice(2);
         }
     }
+}
+
+void PlayScene::ProcessDialogueAction() {
     DialogueAction action = dialogueBox.GetRequest();
 
-    if(action == DialogueAction::OpenShop) {
+    if (action == DialogueAction::None) return;
+
+    std::string questId = dialogueBox.GetRequestedQuestId();
+
+    if (action == DialogueAction::OpenShop) {
         request = SceneRequest::OpenShop;
         dialogueBox.Hide();
-        dialogueBox.ClearRequest();
     }
-    if(action == DialogueAction::CloseDialogue) {
+    else if (action == DialogueAction::CloseDialogue) {
         dialogueBox.Hide();
-        dialogueBox.ClearRequest();
     }
+    else if (action == DialogueAction::ShowText) {
+        // 이미 DialogueBox::SelectChoice()에서 resultText가 표시됨
+    }
+    else if (action == DialogueAction::AcceptQuest) {
+        bool accepted = questManager->AcceptQuest(questId);
+        Quest* quest = questManager->GetQuest(questId);
+
+        if (quest != nullptr) {
+            if (accepted) {
+                dialogueBox.Show("동료", quest->acceptDialogue);
+            }
+            else {
+                dialogueBox.Show("동료", {"이미 받은 의뢰입니다."});
+            }
+        }
+    }
+    else if (action == DialogueAction::CompleteQuest) {
+        QuestResult result = questManager->CompleteQuest(questId);
+        Quest* quest = questManager->GetQuest(questId);
+
+        if (quest == nullptr) {
+            dialogueBox.Show("System", {"퀘스트를 찾을 수 없습니다."});
+        }
+        else if (result == QuestResult::Success) {
+            dialogueBox.Show("동료", quest->completeDialogue);
+        }
+        else if (result == QuestResult::ConditionNotMet) {
+            dialogueBox.Show("동료", quest->progressDialogue);
+        }
+        else if (result == QuestResult::AlreadyCompleted) {
+            dialogueBox.Show("동료", quest->alreadyCompletedDialogue);
+        }
+    }
+
+    dialogueBox.ClearRequest();
 }
 
 void PlayScene::CheckNPCInteraction() {
@@ -204,27 +243,59 @@ void PlayScene::CheckNPCInteraction() {
 
     for (auto& npc : npcs) {
         if (IsNear(*player, npc.GetEntity(), 80)) {
-            dialogueBox.ShowChoices(
-                npc.GetName(),
-                "무엇을 도와드릴까요?",
-                {
+            if (npc.GetName() == "동료"){
+                dialogueBox.ShowChoices(
+                    npc.GetName(),
+                    "포션 3개를 가져와 주실 수 있나요?",
                     {
-                        "마을에 대해 묻는다",
-                        "이 마을은 오래된 항구 마을입니다.",
-                        DialogueAction::ShowText
-                    },
-                    {
-                        "상점 열기",
-                        "상점을 여는 중 ...",
-                        DialogueAction::OpenShop
-                    },
-                    {
-                        "떠난다",
-                        "다음에 또 오세요.",
-                        DialogueAction::CloseDialogue
+                        {
+                            "퀘스트를 수락한다",
+                            "좋아요, 포션 3개에요!",
+                            DialogueAction::AcceptQuest,
+                            "collect_potion"
+                        },
+                        {
+                            "퀘스트를 완료한다",
+                            "확인해볼게요",
+                            DialogueAction::CompleteQuest,
+                            "collect_potion"
+                        },
+                        {
+                            "떠난다",
+                            "다음에 또 오세요.",
+                            DialogueAction::CloseDialogue,
+                            ""
+                        }
                     }
-                }
-            );
+                );
+            }
+            else {
+                dialogueBox.ShowChoices(
+                    npc.GetName(),
+                    "무엇을 도와드릴까요?",
+                    {
+                        {
+                            "마을에 대해 묻는다",
+                            "이 마을은 오래된 항구 마을입니다.",
+                            DialogueAction::ShowText,
+                            ""
+                        },
+                        {
+                            "상점 열기",
+                            "상점을 여는 중 ...",
+                            DialogueAction::OpenShop,
+                            ""
+                        },
+                        {
+                            "떠난다",
+                            "다음에 또 오세요.",
+                            DialogueAction::CloseDialogue,
+                            ""
+                        }
+                    }
+                );
+            }
+
             return;
         }
     }
@@ -255,6 +326,7 @@ void PlayScene::Update() {
     for(auto& npc : npcs){
         npc.Update(player);
     }
+    ProcessDialogueAction();
 }
 
 void PlayScene::UpdatePlayer() {

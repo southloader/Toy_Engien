@@ -1,0 +1,28 @@
+#pragma once 
+
+#include <string>
+#include <unordered_map>
+
+#include "Quest.h"
+#include "GameData.h"
+#include "ItemDatabase.h"
+
+class QuestManager {
+public:
+    QuestManager(GameData* gameData);
+    Quest* GetQuest(const std::string& id);
+
+    void RegisterQuest(const Quest& quest);
+    bool AcceptQuest(const std::string& id);
+    bool CanComplete(const std::string& id);
+    QuestResult CompleteQuest(const std::string& id);
+    bool GiveReward(const std::string& id);
+
+    bool IsActive(const std::string& id);
+    bool IsCompleted(const std::string& id);  
+
+private:
+    GameData* gameData;
+
+    std::unordered_map<std::string, Quest> questDatabase;
+};
