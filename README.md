@@ -247,78 +247,161 @@ ItemDatabase
 
 # Development Log
 
-## Quest System (Phase 1)
+## Quest System (Phase 2)
 
-### Quest Core
+### QuestDatabase
 
-* `Quest` 구조체 추가
-* `QuestState` 도입
-
-```cpp
-Available
-Active
-Completed
-```
-
-* 퀘스트 목표 및 보상 정보 추가
+Quest 데이터를 코드에서 직접 생성하는 방식에서 데이터베이스 기반 관리 방식으로 변경.
 
 ```cpp
-QuestType type;
-
-std::string targetId;
-
-int targetCount;
-
-std::string rewardItemId;
-
-int rewardAmount;
+QuestDatabase::Get("collect_potion");
 ```
-
----
-
-### QuestLog
-
-플레이어가 현재 보유 중인 퀘스트를 관리하는 시스템 구현.
 
 지원 기능:
 
+* Quest 등록
+* Quest 조회
+* Quest 데이터 재사용
+* NPC와 Quest 분리
+
+기존 구조
+
 ```cpp
-AddQuest()
+Quest quest;
 
-HasQuest()
+quest.id = "collect_potion";
 
-GetQuest()
+questManager->RegisterQuest(quest);
+```
 
-GetQuests()
+↓
+
+변경 후
+
+```cpp
+questManager->RegisterQuest(
+    QuestDatabase::Get(
+        "collect_potion"
+    )
+);
 ```
 
 ---
 
-### QuestManager
+### Quest Overlay
 
-Quest 관련 로직을 `QuestManager` 로 분리.
+Quest 로그 UI 추가.
 
-AI 친화적인 API를 목표로 설계.
+```text
+J
+↓
 
-```cpp
-questManager.AcceptQuest(id);
+Quest Log
 
-questManager.CanComplete(id);
+Potion Collector
 
-questManager.CompleteQuest(id);
+Progress
 
-questManager.GiveReward(id);
+2 / 3
+
+Reward
+
+Potion x2
 ```
 
-QuestLog는 상태 저장만 담당하고,
+지원 기능
 
-QuestManager는 퀘스트 진행 및 보상 처리를 담당하도록 역할 분리.
+* Quest 목록 표시
+* 진행도 표시
+* 보상 표시
+* Overlay 기반 UI
 
 ---
 
-### QuestResult
+### Quest Progress Tracking
 
-퀘스트 완료 결과를 반환하는 시스템 추가.
+QuestManager가 Inventory 데이터를 읽어 진행도를 갱신하도록 구현.
+
+```cpp
+questManager->UpdateQuestProgress();
+```
+
+지원 타입
+
+```cpp
+QuestType::CollectItem
+```
+
+진행도 계산
+
+```cpp
+quest.currentCount =
+    inventory.GetSlot(
+        quest.targetId
+    )->count;
+```
+
+---
+
+### Dynamic Quest Dialogue
+
+Quest 상태에 따라 NPC 선택지가 변경되도록 개선.
+
+기존
+
+```text
+항상
+
+[퀘스트 수락]
+
+[퀘스트 완료]
+```
+
+↓
+
+변경 후
+
+```text
+Available
+
+↓
+
+수락
+
+Active
+
+↓
+
+진행상황 출력
+
+Complete 가능
+
+↓
+
+완료 선택지
+
+Completed
+
+↓
+
+감사 인사
+```
+
+지원 상태
+
+```cpp
+QuestState::Available
+
+QuestState::Active
+
+QuestState::Completed
+```
+
+---
+
+### Quest Completion Result
+
+Quest 완료 결과 반환 시스템 추가.
 
 ```cpp
 enum class QuestResult
@@ -333,66 +416,21 @@ enum class QuestResult
 };
 ```
 
-이를 통해 단순 bool 반환 대신 상태 기반 처리가 가능해짐.
+상태 기반 대화 처리 가능.
 
 ```cpp
 QuestResult result =
-    questManager.CompleteQuest(id);
-```
-
----
-
-### Inventory Integration
-
-퀘스트 완료 조건 확인 시 Inventory 데이터를 조회하도록 구현.
-
-```cpp
-const InventorySlot* slot =
-    inventory.GetSlot("potion");
-```
-
-읽기 전용 접근 방식을 사용하여 Inventory 상태가 외부에서 수정되지 않도록 제한.
-
-```cpp
-const InventorySlot*
-Inventory::GetSlot(
-    const std::string& id
-) const;
-```
-
----
-
-### Dialogue Integration
-
-기존 Dialogue 시스템과 Quest 시스템 연결.
-
-새로운 DialogueAction 추가.
-
-```cpp
-AcceptQuest
-
-CompleteQuest
-```
-
-선택지에서 Quest ID를 전달할 수 있도록 개선.
-
-```cpp
-DialogueChoice
-{
-    text,
-    resultText,
-
-    action,
-
-    questId
-}
+    questManager
+    ->CompleteQuest(
+        id
+    );
 ```
 
 ---
 
 ### Quest Dialogue
 
-Quest 데이터 내부에 상태별 대사 추가.
+Quest 내부에 상태별 대사 저장.
 
 ```cpp
 acceptDialogue
@@ -404,107 +442,90 @@ completeDialogue
 alreadyCompletedDialogue
 ```
 
-예시:
+예시
 
 ```cpp
-quest.acceptDialogue =
-{
-    "좋아요.",
-    "포션 3개를 가져와 주세요."
-};
-
-quest.progressDialogue =
-{
-    "아직 부족해요.",
-    "포션이 3개 필요합니다."
-};
-
 quest.completeDialogue =
 {
     "좋아요!",
     "여기 보수입니다."
 };
-
-quest.alreadyCompletedDialogue =
-{
-    "이미 도와주셨어요."
-};
 ```
 
 ---
 
-### NPC Interaction
+### Quest Consume System
 
-NPC 선택지를 통해 퀘스트 수락 및 완료 가능.
+퀘스트 완료 시 요구 아이템 소비 기능 추가.
+
+```cpp
+quest.consumeTargetItem =
+    true;
+```
+
+예시
 
 ```text
-NPC
+Potion x3
 
 ↓
 
-Dialogue
+Quest Complete
 
 ↓
 
-AcceptQuest
-
-↓
-
-QuestManager
-
-↓
-
-Inventory Check
-
-↓
-
-CompleteQuest
+Potion x3 제거
 
 ↓
 
 Reward
 
-↓
-
-Dialogue Feedback
+Potion x2 지급
 ```
 
 ---
 
-## Architecture Update
+### Architecture Update
 
 ```text
-ItemDatabase
-        │
-
-Inventory
-        │
-
-QuestLog
+QuestDatabase
         │
 
 QuestManager
+        │
+
+QuestLog
         │
 
 Dialogue
         │
 
 NPC
+        │
+
+Inventory
 ```
 
-Quest 데이터를 단순 저장 구조에서 관리 시스템으로 승격.
+Quest 시스템이 Dialogue, Inventory, UI와 완전히 연결됨.
 
-QuestManager를 통해 AI 친화적인 고수준 API 제공.
+---
 
-```cpp
-questManager.AcceptQuest(
-    "collect_potion"
-);
+## Quest System Status
 
-questManager.CompleteQuest(
-    "collect_potion"
-);
-```
+Implemented
+
+* QuestDatabase
+* QuestManager
+* QuestLog
+* Quest Overlay
+* Quest Progress Tracking
+* Dynamic Quest Dialogue
+* QuestResult
+* Reward System
+* Item Consumption
+* Inventory Integration
+
+Quest System Phase 1 Complete
 
 ---
 
@@ -512,9 +533,16 @@ questManager.CompleteQuest(
 
 Planned Features
 
-* QuestDatabase
-* Quest Overlay UI
-* Dynamic NPC Dialogue
 * Multiple Quest Types
-* Save / Load System
+
+  * KillMonster
+  * TalkToNPC
+  * ReachLocation
+
+* Save / Load
+
 * EventManager
+
+* Quest Notification UI
+
+* World Event System

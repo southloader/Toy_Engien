@@ -54,6 +54,9 @@ void SceneManager::ProcessRequest(bool& running) {
     else if (request == SceneRequest::CloseOverlay) {
         PopOverlay();
     }
+    else if (request == SceneRequest::OpenQuestLog) {
+        PushOverlay("QuestLog");
+    }
     else if (request == SceneRequest::ExitGame) {
         running = false;
     }

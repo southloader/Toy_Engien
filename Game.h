@@ -10,6 +10,9 @@
 #include "InventoryScene.h"
 #include "GameData.h"
 #include "QuestManager.h"
+#include "QuestDatabase.h"
+#include "QuestScene.h"
+
 
 enum class GameState {
     MainMenu,

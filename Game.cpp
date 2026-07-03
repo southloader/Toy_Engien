@@ -1,6 +1,7 @@
 #include "Game.h"
 
 
+
 //Game 생성자
 void Game::Init() {
     //작동 트리거 true
@@ -41,38 +42,12 @@ void Game::Init() {
     //아이템 데이터 베이스 초기화
     ItemDatabase::Init();
 
-    //퀘스트 매니저 초기화
+    //퀘스트 데이터 베이스 초기화
+    QuestDatabase::Init();
+
     questManager = new QuestManager(&gameData);
 
-    Quest quest;
-    quest.id = "collect_potion";
-    quest.type = QuestType::CollectItem;
-    quest.targetId = "potion";
-    quest.targetCount = 3;
-    quest.title = "Potion Collector";
-    quest.description = "Collect 3 potions.";
-    quest.currentCount = 0;
-    quest.rewardItemId = "potion";
-    quest.rewardAmount = 2;
-    quest.rewardGold = 200;
-    quest.acceptDialogue = {
-        "좋아요.",
-        "포션 3개를 가져와 주세요."
-    };
-    quest.progressDialogue = {
-        "아직 포션이 부족해요.",
-        "포션 3개가 필요합니다."
-    };
-    quest.completeDialogue = {
-        "좋아요!",
-        "여기 보수입니다."
-    };
-    quest.alreadyCompletedDialogue = {
-        "이미 도와주셨잖아요.",
-        "다시 한 번 고마워요."
-    };
-    
-    questManager->RegisterQuest(quest);
+    questManager->RegisterQuest(QuestDatabase::Get("collect_potion"));
 
     //플레이어와 적을 생성. 엔티티들은 엔티티 벡터에 저장.
     for(int i = 0; i < 5; i++){
@@ -105,6 +80,7 @@ void Game::Init() {
     sceneManager.AddScene("Pause", new PauseScene(font));
     sceneManager.AddScene("Shop", new ShopScene(font, &gameData));
     sceneManager.AddScene("Inventory", new InventoryScene(font, &gameData));
+    sceneManager.AddScene("QuestLog", new QuestScene(font, &gameData));
     sceneManager.ChangeScene("MainMenu");
 }
 

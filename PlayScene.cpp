@@ -166,6 +166,9 @@ void PlayScene::HandleEvents(SDL_Event& event) {
         if (event.key.keysym.sym == SDLK_i) {
             request = SceneRequest::OpenInventory;
         }
+        if (event.key.keysym.sym == SDLK_j) {
+            request = SceneRequest::OpenQuestLog;
+        }
         if (event.key.keysym.sym == SDLK_1) {
             dialogueBox.SelectChoice(0);
         }
@@ -243,31 +246,57 @@ void PlayScene::CheckNPCInteraction() {
 
     for (auto& npc : npcs) {
         if (IsNear(*player, npc.GetEntity(), 80)) {
-            if (npc.GetName() == "동료"){
-                dialogueBox.ShowChoices(
-                    npc.GetName(),
-                    "포션 3개를 가져와 주실 수 있나요?",
-                    {
+            if (npc.GetName() == "동료") {
+                Quest* quest = questManager->GetQuest("collect_potion");
+                if(quest == nullptr) {
+                    dialogueBox.ShowChoices(npc.GetName(),
+                        "포션 3개를 가져와 주실 수 있나요?",
                         {
-                            "퀘스트를 수락한다",
-                            "좋아요, 포션 3개에요!",
-                            DialogueAction::AcceptQuest,
-                            "collect_potion"
-                        },
-                        {
-                            "퀘스트를 완료한다",
-                            "확인해볼게요",
-                            DialogueAction::CompleteQuest,
-                            "collect_potion"
-                        },
-                        {
-                            "떠난다",
-                            "다음에 또 오세요.",
-                            DialogueAction::CloseDialogue,
-                            ""
+                            {
+                                "퀘스트를 수락한다",
+                                "좋아요, 포션 3개에요!",
+                                DialogueAction::AcceptQuest,
+                                "collect_potion"
+                            },
+                            {
+                                "거절한다.",
+                                "그래요.",
+                                DialogueAction::CloseDialogue,
+                                ""
+                            },
                         }
+                    );
+                }
+                else if (quest->state == QuestState::Active) {
+                    if(questManager->CanComplete("collect_potion")) {
+                        dialogueBox.ShowChoices(npc.GetName(),
+                            "포션을 다 모아오셨군요!",
+                            {
+                                {
+                                    "퀘스트를 완료한다.",
+                                    "좋아요, 확인해볼까요?",
+                                    DialogueAction::CompleteQuest,
+                                    "collect_potion"
+                                },
+                                {
+                                    "아직 보류한다.",
+                                    "뭐 더 기다리죠.",
+                                    DialogueAction::CloseDialogue,
+                                    ""
+                                }
+                            }
+                        );
                     }
-                );
+                    else {
+                        dialogueBox.Show (npc.GetName(), quest->progressDialogue);
+                    }
+                }
+
+                else if (quest->state == QuestState::Completed) {
+                    dialogueBox.Show(npc.GetName(), quest->alreadyCompletedDialogue);
+                }
+
+                return;
             }
             else {
                 dialogueBox.ShowChoices(
@@ -295,7 +324,6 @@ void PlayScene::CheckNPCInteraction() {
                     }
                 );
             }
-
             return;
         }
     }
@@ -321,11 +349,16 @@ void PlayScene::MoveAndCollideY(Entity& entity, int moveY) {
 }
 
 void PlayScene::Update() {
-    Entity* player = GetPlayer();
     UpdatePlayer();
-    for(auto& npc : npcs){
+
+    Entity* player = GetPlayer();
+
+    for (auto& npc : npcs) {
         npc.Update(player);
     }
+
+    questManager->UpdateQuestProgress();
+
     ProcessDialogueAction();
 }
 

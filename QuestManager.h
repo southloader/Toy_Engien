@@ -14,6 +14,7 @@ public:
 
     void RegisterQuest(const Quest& quest);
     bool AcceptQuest(const std::string& id);
+    void UpdateQuestProgress();
     bool CanComplete(const std::string& id);
     QuestResult CompleteQuest(const std::string& id);
     bool GiveReward(const std::string& id);

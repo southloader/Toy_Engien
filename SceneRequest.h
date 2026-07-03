@@ -8,5 +8,6 @@ enum class SceneRequest {
     OpenShop,
     OpenInventory,
     CloseOverlay,
+    OpenQuestLog,
     ExitGame
 };

@@ -29,3 +29,7 @@ Quest* QuestLog::GetQuest(const std::string& id) {
 const std::vector<Quest>& QuestLog::GetQuests() const {
     return quests;    
 }
+
+std::vector<Quest>& QuestLog::GetMutableQuests() {
+    return quests;
+}

@@ -32,6 +32,7 @@ struct Quest {
     std::string targetId;
     int targetCount = 0;
     int currentCount = 0;
+    bool consumeTargetItem = true;
 
     std::string rewardItemId;
     int rewardAmount = 1;

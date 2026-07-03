@@ -66,7 +66,15 @@ QuestResult QuestManager::CompleteQuest(const std::string& id){
     if (!CanComplete(id)) {
         return QuestResult::ConditionNotMet;
     }
+    if (quest->consumeTargetItem && quest->type == QuestType::CollectItem) {
+        for (int i = 0; i < quest->targetCount; i++) {
+            gameData->inventory.RemoveItem(quest->targetId);
+        }
+    }
+    
     quest->state = QuestState::Completed;
+    quest->currentCount = quest->targetCount;
+    
     GiveReward(id);
 
     return QuestResult::Success;
@@ -110,3 +118,26 @@ bool QuestManager::IsCompleted(const std::string& id) {
     return quest->state == QuestState::Completed;
 }
 
+void QuestManager::UpdateQuestProgress() {
+    auto& quests = gameData->questLog.GetMutableQuests();
+
+    for (auto& quest : quests) {
+        if (quest.state != QuestState::Active) continue;
+
+        if (quest.type == QuestType::CollectItem) {
+            const InventorySlot* slot =
+                gameData->inventory.GetSlot(quest.targetId);
+
+            if (slot != nullptr) {
+                quest.currentCount = slot->count;
+            }
+            else {
+                quest.currentCount = 0;
+            }
+
+            if (quest.currentCount > quest.targetCount) {
+                quest.currentCount = quest.targetCount;
+            }
+        }
+    }
+}

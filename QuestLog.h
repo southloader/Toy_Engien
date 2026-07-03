@@ -7,9 +7,11 @@ public:
     void AddQuest(const Quest& quest);
     bool HasQuest(const std::string& id);
     Quest* GetQuest(const std::string& id);
+    std::vector<Quest>& GetMutableQuests();
 
     const std::vector<Quest>& GetQuests() const;
 
 private:
     std::vector<Quest> quests;
+    
 };
