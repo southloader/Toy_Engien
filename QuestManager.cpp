@@ -1,7 +1,6 @@
 #include "QuestManager.h"
 #include <cstdio>
 
-
 QuestManager::QuestManager(GameData* gameData) {
     this->gameData = gameData;
 }
@@ -14,6 +13,14 @@ void QuestManager::RegisterQuest(const Quest& quest) {
     questDatabase[quest.id] = quest;
 
     printf("Quest registered: %s\n", quest.id.c_str());
+}
+
+void QuestManager::RegisterAllFromDatabase() {
+    const auto& quests = QuestDatabase::GetAll();
+
+    for (const auto& pair : quests) {
+        RegisterQuest(pair.second);
+    }
 }
 
 bool QuestManager::AcceptQuest(const std::string& id) {
@@ -36,8 +43,26 @@ bool QuestManager::AcceptQuest(const std::string& id) {
     return true;
 }
 
-bool QuestManager::CanComplete(const std::string& id)
-{
+bool QuestManager::AbandonQuest(const std::string& id) {
+    Quest* quest = gameData->questLog.GetQuest(id);
+
+    if (quest == nullptr) {
+        printf("Quest not found: %s\n", id.c_str());
+        return false;
+    }
+
+    if (quest->state == QuestState::Completed) {
+        printf("Completed quest cannot be abandoned: %s\n", id.c_str());
+        return false;
+    }
+
+    gameData->questLog.RemoveQuest(id);
+
+    printf("Quest abandoned: %s\n", id.c_str());
+    return true;
+}
+
+bool QuestManager::CanComplete(const std::string& id) {
     Quest* quest = gameData->questLog.GetQuest(id);
 
     if(quest == nullptr)
@@ -54,7 +79,7 @@ bool QuestManager::CanComplete(const std::string& id)
     return false;
 }
 
-QuestResult QuestManager::CompleteQuest(const std::string& id){
+QuestResult QuestManager::CompleteQuest(const std::string& id) {
     Quest* quest = gameData->questLog.GetQuest(id);
 
     if (quest == nullptr) {

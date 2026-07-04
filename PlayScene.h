@@ -12,6 +12,7 @@
 #include "DialogueBox.h"
 #include "GameData.h"
 #include "QuestManager.h"
+#include "QuestNotification.h"
 
 class PlayScene : public Scene {
 public:
@@ -39,6 +40,7 @@ private:
     TTF_Font* font;
     GameData* gameData;
     QuestManager* questManager;
+    QuestNotification questNotification;
     
     int playerSpeed = 3;
 

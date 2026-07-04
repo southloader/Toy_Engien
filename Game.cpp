@@ -26,19 +26,11 @@ void Game::Init() {
 
     //텍스처 매니저
     textureManager = new TextureManager(renderer);
-    textureManager->LoadTexture("npc_idle", "assets/npc.png");
-    textureManager->LoadTexture("player", "assets/player.png");
     textureManager->LoadTexture("wall", "assets/brickWall.png");
-    textureManager->LoadTexture("player_walk1" , "assets/player_walk1.png");
-    textureManager->LoadTexture("player_walk2" , "assets/player_walk2.png");
-    textureManager->LoadTexture("player_walk3" , "assets/player_walk3.png");
-    textureManager->LoadTexture("player_run1", "assets/player_run1.png");
-    textureManager->LoadTexture("player_run2", "assets/player_run2.png");
-    textureManager->LoadTexture("player_run3", "assets/player_run3.png");
-    textureManager->LoadTexture("npc_walk_1", "assets/player_walk1.png");
-    textureManager->LoadTexture("npc_walk_2", "assets/player_walk2.png");
-    textureManager->LoadTexture("npc_walk_3", "assets/player_walk3.png");
 
+    //캐릭터 데이터 베이스 초기화
+    CharacterDatabase::Init(textureManager);
+  
     //아이템 데이터 베이스 초기화
     ItemDatabase::Init();
 
@@ -47,7 +39,7 @@ void Game::Init() {
 
     questManager = new QuestManager(&gameData);
 
-    questManager->RegisterQuest(QuestDatabase::Get("collect_potion"));
+    questManager->RegisterAllFromDatabase();
 
     //플레이어와 적을 생성. 엔티티들은 엔티티 벡터에 저장.
     for(int i = 0; i < 5; i++){

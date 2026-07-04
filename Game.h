@@ -12,6 +12,7 @@
 #include "QuestManager.h"
 #include "QuestDatabase.h"
 #include "QuestScene.h"
+#include "CharacterDatabase.h"
 
 
 enum class GameState {

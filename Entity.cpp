@@ -42,3 +42,25 @@ bool Entity::CheckCollision(Entity& other){
         y + height > other.y
     );
 }
+
+void Entity::LoadCharacter(
+    const CharacterData& data,
+    TextureManager* textureManager
+) {
+    for (const auto& pair : data.animations) {
+        const std::string& animName = pair.first;
+        const AnimationData& animData = pair.second;
+
+        Animation animation;
+
+        for (const auto& textureId : animData.textureIds) {
+            animation.AddFrame(textureManager->GetTexture(textureId));
+        }
+
+        animation.SetFrameDelay(animData.frameDelay);
+
+        animator.AddAnimation(animName, animation);
+    }
+
+    animator.Play(data.defaultAnimation);
+}

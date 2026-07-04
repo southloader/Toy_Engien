@@ -1,4 +1,5 @@
 #include "PlayScene.h"
+#include "CharacterDatabase.h"
 #include <cstdio>
 
 PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager) {
@@ -24,32 +25,13 @@ PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* g
 void PlayScene::InitEntities() {
 
     Entity player;
-    Animation idle;
-    idle.AddFrame(textureManager->GetTexture("player"));
-    idle.SetFrameDelay(1000);
-    player.animator.AddAnimation("Idle", idle);
-    
-    Animation walk;
-    walk.AddFrame(textureManager->GetTexture("player_walk1"));
-    walk.AddFrame(textureManager->GetTexture("player_walk2"));
-    walk.AddFrame(textureManager->GetTexture("player_walk3"));
-    walk.SetFrameDelay(150);
-    player.animator.AddAnimation("Walk", walk);
-
-    Animation run;
-    run.AddFrame(textureManager->GetTexture("player_run1"));
-    run.AddFrame(textureManager->GetTexture("player_run2"));
-    run.AddFrame(textureManager->GetTexture("player_run3"));
-    run.AddFrame(textureManager->GetTexture("player_run2"));
-    run.SetFrameDelay(100);
-    player.animator.AddAnimation("Run", run);
-
-    player.animator.Play("Idle");
     player.x = 100;
     player.y = 100;
     player.width = 50;
     player.height = 50;
     player.type = PLAYER;
+
+    player.LoadCharacter(CharacterDatabase::Get("player"), textureManager);
 
     entities.push_back(player);
 }
@@ -86,21 +68,8 @@ void PlayScene::InitNPCs() {
     guard.SetName("순찰병");
     guard.SetPosition(300, 100);
     guard.SetSize(50, 50);
-    guard.SetTexture(textureManager->GetTexture("npc_idle"));
+    guard.GetEntity().LoadCharacter(CharacterDatabase::Get("npc"), textureManager);
 
-    Animation guardIdle;
-    guardIdle.AddFrame(textureManager->GetTexture("npc_idle"));
-    guardIdle.SetFrameDelay(1000);
-
-    Animation guardWalk;
-    guardWalk.AddFrame(textureManager->GetTexture("npc_walk_1"));
-    guardWalk.AddFrame(textureManager->GetTexture("npc_walk_2"));
-    guardWalk.AddFrame(textureManager->GetTexture("npc_walk_3"));
-    guardWalk.SetFrameDelay(150);
-
-    guard.GetEntity().animator.AddAnimation("Idle", guardIdle);
-    guard.GetEntity().animator.AddAnimation("Walk", guardWalk);
-    guard.GetEntity().animator.Play("Idle");
 
     guard.SetDialogue({
         "나는 순찰 중입니다.",
@@ -204,11 +173,23 @@ void PlayScene::ProcessDialogueAction() {
 
         if (quest != nullptr) {
             if (accepted) {
+                questNotification.Show("Quest Accepted!");
                 dialogueBox.Show("동료", quest->acceptDialogue);
             }
             else {
                 dialogueBox.Show("동료", {"이미 받은 의뢰입니다."});
             }
+        }
+    }
+    else if (action == DialogueAction::AbandonQuest) {
+        bool abandoned = questManager->AbandonQuest(questId);
+
+        if (abandoned) {
+            questNotification.Show("Quest Abandoned!");
+            dialogueBox.Show("동료", {"알겠습니다.", "다음에 하셔도 돼요!"});
+        }
+        else {
+            dialogueBox.Show("동료", {"이 의뢰는 취소할 수 없습니다."});
         }
     }
     else if (action == DialogueAction::CompleteQuest) {
@@ -219,6 +200,7 @@ void PlayScene::ProcessDialogueAction() {
             dialogueBox.Show("System", {"퀘스트를 찾을 수 없습니다."});
         }
         else if (result == QuestResult::Success) {
+            questNotification.Show("Quest Complete!");
             dialogueBox.Show("동료", quest->completeDialogue);
         }
         else if (result == QuestResult::ConditionNotMet) {
@@ -288,7 +270,28 @@ void PlayScene::CheckNPCInteraction() {
                         );
                     }
                     else {
-                        dialogueBox.Show (npc.GetName(), quest->progressDialogue);
+                        dialogueBox.ShowChoices(npc.GetName(),"아직 포션이 부족해요.",
+                        {
+                            {
+                                "계속 진행한다.",
+                                "기다리고 있을게요.",
+                                DialogueAction::ShowText,
+                                ""
+                            },
+                            {
+                                "퀘스트를 포기한다.",
+                                "알겠습니다.",
+                                DialogueAction::AbandonQuest,
+                                "collect_potion"
+                            },
+                            {
+                                "떠난다.",
+                                "다음에 또 오세요.",
+                                DialogueAction::CloseDialogue,
+                                ""
+                            }
+
+                        });
                     }
                 }
 
@@ -360,6 +363,7 @@ void PlayScene::Update() {
     questManager->UpdateQuestProgress();
 
     ProcessDialogueAction();
+    questNotification.Update();
 }
 
 void PlayScene::UpdatePlayer() {
@@ -442,6 +446,7 @@ void PlayScene::Render(SDL_Renderer* renderer) {
     }
 
     dialogueBox.Render(renderer, font);
+    questNotification.Render(renderer, font);
 }
 
 SceneRequest PlayScene::GetRequest() {

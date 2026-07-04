@@ -16,6 +16,17 @@ bool QuestLog::HasQuest(const std::string& id) {
     return false;
 }
 
+bool QuestLog::RemoveQuest(const std::string& id) {
+    for (auto it = quests.begin(); it != quests.end(); ++it) {
+        if (it->id == id) {
+            quests.erase(it);
+            return true;
+        }
+    }
+
+    return false;
+}
+
 Quest* QuestLog::GetQuest(const std::string& id) {
     for(auto& q : quests) {
         if(q.id == id){

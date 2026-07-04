@@ -59,3 +59,7 @@ Quest QuestDatabase::Get(const std::string& id) {
 
     return quests[id];
 }
+
+const std::unordered_map<std::string, Quest>& QuestDatabase::GetAll() {
+    return quests;
+}

@@ -6,6 +6,7 @@
 #include "Quest.h"
 #include "GameData.h"
 #include "ItemDatabase.h"
+#include "QuestDatabase.h"
 
 class QuestManager {
 public:
@@ -13,7 +14,9 @@ public:
     Quest* GetQuest(const std::string& id);
 
     void RegisterQuest(const Quest& quest);
+    void RegisterAllFromDatabase();
     bool AcceptQuest(const std::string& id);
+    bool AbandonQuest(const std::string& id);
     void UpdateQuestProgress();
     bool CanComplete(const std::string& id);
     QuestResult CompleteQuest(const std::string& id);

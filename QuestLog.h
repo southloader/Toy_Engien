@@ -6,6 +6,7 @@ class QuestLog {
 public:
     void AddQuest(const Quest& quest);
     bool HasQuest(const std::string& id);
+    bool RemoveQuest(const std::string& id);
     Quest* GetQuest(const std::string& id);
     std::vector<Quest>& GetMutableQuests();
 

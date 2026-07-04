@@ -1,6 +1,8 @@
 #pragma once
 #include "Camera.h"
 #include "Animator.h"
+#include "CharacterData.h"
+#include "TextureManager.h"
 
 enum EntityType {
     PLAYER,
@@ -22,6 +24,7 @@ public:
     Direction direction = Direction::Right;
 
     bool CheckCollision(Entity& other);
+    void LoadCharacter(const CharacterData& data, TextureManager* textureManager);
     SDL_Texture* texture = nullptr;
     Animator animator;
 

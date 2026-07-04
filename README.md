@@ -1,6 +1,11 @@
 # Toy Engine Prototype
 
 게임 엔진의 기본 구조를 이해하기 위해 개발 중인 토이 엔진 프로젝트입니다.
+그리고 또한...
+
+# AI-Friendly 2D RPG Engine
+
+A lightweight SDL2-based RPG framework designed to be easy for both developers and AI systems to understand and extend.
 
 ## 목표
 
@@ -8,11 +13,12 @@
 * UI 요소 식별 구조 설계
 * 입력 처리 및 객체 관리 구조 실험
 * 유지보수 가능한 코드 구조 학습
+* "AI가 읽기 쉬운 고수준 API를 구현하여 단순한 AI로도 2D RPG 게임을 만들 수 있도록."
 
-## 내가 고민한 부분
+## 개선 중점
 
-* 엔진 사용자와 개발자가 UI 요소를 직관적으로 다룰 수 있도록 id 기반 식별 구조를 구상했습니다.
-* 단순 기능 구현보다 내부 구조와 확장성을 이해하는 데 초점을 두었습니다.
+* 엔진 사용자와 개발자가 UI 요소를 직관적으로 다룰 수 있도록 id 기반 식별 구조
+* 단순 기능 구현보다 내부 구조와 확장성을 이해
 
 ## 사용 기술
 
@@ -247,36 +253,56 @@ ItemDatabase
 
 # Development Log
 
-## Quest System (Phase 2)
+## Quest System Phase 1 Complete
 
-### QuestDatabase
+### Quest Abandon System
 
-Quest 데이터를 코드에서 직접 생성하는 방식에서 데이터베이스 기반 관리 방식으로 변경.
+Added support for abandoning active quests.
 
-```cpp
-QuestDatabase::Get("collect_potion");
-```
+Features:
 
-지원 기능:
+- Abandon active quests
+- Prevent abandoning completed quests
+- QuestLog removal support
+- Dialogue integration
 
-* Quest 등록
-* Quest 조회
-* Quest 데이터 재사용
-* NPC와 Quest 분리
-
-기존 구조
+Example:
 
 ```cpp
-Quest quest;
-
-quest.id = "collect_potion";
-
-questManager->RegisterQuest(quest);
+questManager->AbandonQuest(
+    "collect_potion"
+);
 ```
 
-↓
+---
 
-변경 후
+### Quest Notification UI
+
+Implemented quest-related notifications.
+
+Supported events:
+
+- Quest Accepted
+- Quest Complete
+- Quest Abandoned
+
+Example:
+
+```cpp
+questNotification.Show(
+    "Quest Complete!"
+);
+```
+
+Quest notifications are now integrated with the Dialogue and Quest systems.
+
+---
+
+### Quest Database Auto Registration
+
+Added automatic registration of quests from QuestDatabase.
+
+Previous workflow:
 
 ```cpp
 questManager->RegisterQuest(
@@ -286,263 +312,195 @@ questManager->RegisterQuest(
 );
 ```
 
----
+New workflow:
 
-### Quest Overlay
+```cpp
+QuestDatabase::Init();
 
-Quest 로그 UI 추가.
-
-```text
-J
-↓
-
-Quest Log
-
-Potion Collector
-
-Progress
-
-2 / 3
-
-Reward
-
-Potion x2
+questManager->RegisterAllFromDatabase();
 ```
 
-지원 기능
-
-* Quest 목록 표시
-* 진행도 표시
-* 보상 표시
-* Overlay 기반 UI
+New quests can now be added by modifying only QuestDatabase.
 
 ---
 
-### Quest Progress Tracking
+# Character Database Refactoring
 
-QuestManager가 Inventory 데이터를 읽어 진행도를 갱신하도록 구현.
+### CharacterData API
 
-```cpp
-questManager->UpdateQuestProgress();
-```
+Improved character registration workflow.
 
-지원 타입
+Previous workflow:
 
 ```cpp
-QuestType::CollectItem
-```
+CharacterData player;
 
-진행도 계산
+player.id = "player";
 
-```cpp
-quest.currentCount =
-    inventory.GetSlot(
-        quest.targetId
-    )->count;
-```
-
----
-
-### Dynamic Quest Dialogue
-
-Quest 상태에 따라 NPC 선택지가 변경되도록 개선.
-
-기존
-
-```text
-항상
-
-[퀘스트 수락]
-
-[퀘스트 완료]
-```
-
-↓
-
-변경 후
-
-```text
-Available
-
-↓
-
-수락
-
-Active
-
-↓
-
-진행상황 출력
-
-Complete 가능
-
-↓
-
-완료 선택지
-
-Completed
-
-↓
-
-감사 인사
-```
-
-지원 상태
-
-```cpp
-QuestState::Available
-
-QuestState::Active
-
-QuestState::Completed
-```
-
----
-
-### Quest Completion Result
-
-Quest 완료 결과 반환 시스템 추가.
-
-```cpp
-enum class QuestResult
+player.animations["Walk"] =
 {
-    Success,
-
-    ConditionNotMet,
-
-    AlreadyCompleted,
-
-    QuestNotFound
+    ...
 };
 ```
 
-상태 기반 대화 처리 가능.
+New workflow:
 
 ```cpp
-QuestResult result =
-    questManager
-    ->CompleteQuest(
-        id
-    );
+CharacterData player(
+    "player"
+);
+
+player.AddAnimation(
+    "Idle",
+    {
+        "player_idle"
+    },
+    1000
+);
+
+player.AddAnimation(
+    "Walk",
+    {
+        "player_walk_1",
+        "player_walk_2",
+        "player_walk_3"
+    },
+    120
+);
+
+player.SetDefaultAnimation(
+    "Idle"
+);
+
+CharacterDatabase::Register(
+    player
+);
 ```
 
 ---
 
-### Quest Dialogue
+### CharacterDatabase::Register()
 
-Quest 내부에 상태별 대사 저장.
-
-```cpp
-acceptDialogue
-
-progressDialogue
-
-completeDialogue
-
-alreadyCompletedDialogue
-```
-
-예시
+Added a dedicated registration API.
 
 ```cpp
-quest.completeDialogue =
-{
-    "좋아요!",
-    "여기 보수입니다."
-};
+CharacterDatabase::Register(
+    player
+);
 ```
+
+This separates data definition from database storage responsibilities.
 
 ---
 
-### Quest Consume System
+### CharacterData Builder Style API
 
-퀘스트 완료 시 요구 아이템 소비 기능 추가.
+Example:
 
 ```cpp
-quest.consumeTargetItem =
-    true;
+CharacterData merchant(
+    "merchant"
+);
+
+merchant.AddAnimation(
+    "Idle",
+    {
+        "merchant_idle"
+    },
+    1000
+);
+
+merchant.AddAnimation(
+    "Walk",
+    {
+        "walk1",
+        "walk2"
+    },
+    120
+);
+
+merchant.SetDefaultAnimation(
+    "Idle"
+);
+
+CharacterDatabase::Register(
+    merchant
+);
 ```
 
-예시
+Goals:
+
+- Meaning-driven API design
+- AI-friendly asset workflow
+- Flexible animation setup
+- Minimal file naming constraints
+- Minimal folder structure assumptions
+
+---
+
+# Architecture Update
 
 ```text
-Potion x3
+ItemDatabase
 
-↓
-
-Quest Complete
-
-↓
-
-Potion x3 제거
-
-↓
-
-Reward
-
-Potion x2 지급
-```
-
----
-
-### Architecture Update
-
-```text
 QuestDatabase
-        │
 
-QuestManager
-        │
+CharacterDatabase
 
-QuestLog
-        │
+↓
 
-Dialogue
-        │
+Entity
 
-NPC
-        │
+↓
 
-Inventory
+Animator
+
+↓
+
+Renderer
+
+↓
+
+UI
 ```
 
-Quest 시스템이 Dialogue, Inventory, UI와 완전히 연결됨.
+Quest and Character systems are now fully database-driven.
 
 ---
 
-## Quest System Status
+# Quest System Status
 
-Implemented
+```text
+Quest System
 
-* QuestDatabase
-* QuestManager
-* QuestLog
-* Quest Overlay
-* Quest Progress Tracking
-* Dynamic Quest Dialogue
-* QuestResult
-* Reward System
-* Item Consumption
-* Inventory Integration
+██████████ 100%
+```
+
+Implemented:
+
+- QuestDatabase
+- QuestManager
+- QuestLog
+- Quest Overlay
+- Dynamic Dialogue
+- Quest Notifications
+- Quest Abandon
+- Quest Consume System
+- Quest Result
+- Reward System
+- Inventory Integration
 
 Quest System Phase 1 Complete
 
 ---
 
-## Next Goals
+# Next Goals
 
-Planned Features
+Planned Features:
 
-* Multiple Quest Types
-
-  * KillMonster
-  * TalkToNPC
-  * ReachLocation
-
-* Save / Load
-
-* EventManager
-
-* Quest Notification UI
-
-* World Event System
+- Save / Load
+- EventManager
+- Combat System
+- Equipment System
+- Character Auto Loader
+- Asset Manifest
