@@ -14,9 +14,11 @@
 #include "QuestManager.h"
 #include "QuestNotification.h"
 
+class SaveManager;
+
 class PlayScene : public Scene {
 public:
-    PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager);
+    PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager, SaveManager* saveManager);
     ~PlayScene();
 
     void Update() override;
@@ -41,6 +43,7 @@ private:
     GameData* gameData;
     QuestManager* questManager;
     QuestNotification questNotification;
+    SaveManager* saveManager;
     
     int playerSpeed = 3;
 

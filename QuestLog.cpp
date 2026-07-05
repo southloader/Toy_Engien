@@ -1,6 +1,8 @@
 #include "QuestLog.h"
 #include <cstdio>
 
+void QuestLog::Clear() {quests.clear();};
+
 void QuestLog::AddQuest(const Quest& quest){
     quests.push_back(quest);
     printf("Quest Added : %s\n", quest.title.c_str());

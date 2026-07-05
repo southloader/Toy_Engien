@@ -1,4 +1,8 @@
 #include "QuestManager.h"
+#include "GameData.h"
+#include "ItemDatabase.h"
+#include "QuestDatabase.h"
+#include "InventorySlot.h"
 #include <cstdio>
 
 QuestManager::QuestManager(GameData* gameData) {

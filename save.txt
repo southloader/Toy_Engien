@@ -1,0 +1,5 @@
+Gold500
+Inventory
+EndInventory
+Quest
+EndQuest

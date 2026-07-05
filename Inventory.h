@@ -6,6 +6,7 @@
 
 class Inventory {
 public:
+    void Clear();
     void AddItem(const Item& item);
     bool HasItem(const std::string& id);
     bool RemoveItem(const std::string& id);

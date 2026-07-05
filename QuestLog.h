@@ -4,6 +4,7 @@
 
 class QuestLog {
 public:
+    void Clear(); 
     void AddQuest(const Quest& quest);
     bool HasQuest(const std::string& id);
     bool RemoveQuest(const std::string& id);

@@ -15,7 +15,7 @@ void CharacterDatabase::Init(TextureManager* textureManager) {
 
     CharacterData player("player");
     player.AddAnimation("Idle",{"player_idle"}, 1000);
-    player.AddAnimation("walk",{"player_walk_1","player_walk_2","player_walk_3"}, 120);
+    player.AddAnimation("Walk",{"player_walk_1","player_walk_2","player_walk_3"}, 120);
     player.AddAnimation("Run" ,{"player_run_1","player_run_2","player_run_3"}, 70);
     player.SetDefaultAnimation("Idle");
     Register(player);
@@ -27,7 +27,7 @@ void CharacterDatabase::Init(TextureManager* textureManager) {
 
     CharacterData npc("npc");
     npc.AddAnimation("Idle",{"npc_idle"}, 1000);
-    npc.AddAnimation("walk",{"npc_walk_1","npc_walk_2","npc_walk_3"}, 150);
+    npc.AddAnimation("Walk",{"npc_walk_1","npc_walk_2","npc_walk_3"}, 150);
     npc.SetDefaultAnimation("Idle");
     Register(npc);
 }

@@ -1,12 +1,14 @@
 #include "PlayScene.h"
 #include "CharacterDatabase.h"
+#include "SaveManager.h"
 #include <cstdio>
 
-PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager) {
+PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager, SaveManager* saveManager) {
     this->textureManager = textureManager;
     this->font = font;
     this->gameData = gameData;
     this->questManager = questManager;
+    this->saveManager = saveManager;
 
     request = SceneRequest::None;
 
@@ -89,32 +91,18 @@ void PlayScene::InitNPCs() {
     NPC companion;
 
     companion.SetName("동료");
-    companion.SetPosition(150, 200);
+    companion.SetPosition(250, 250);
     companion.SetSize(50, 50);
-    companion.SetTexture(textureManager->GetTexture("npc_idle"));
 
-    Animation companionIdle;
-    companionIdle.AddFrame(textureManager->GetTexture("npc_idle"));
-    companionIdle.SetFrameDelay(1000);
+    companion.GetEntity().LoadCharacter(CharacterDatabase::Get("npc"),textureManager);
 
-    Animation companionWalk;
-    companionWalk.AddFrame(textureManager->GetTexture("npc_walk_1"));
-    companionWalk.AddFrame(textureManager->GetTexture("npc_walk_2"));
-    companionWalk.AddFrame(textureManager->GetTexture("npc_walk_3"));
-    companionWalk.SetFrameDelay(150);
-
-    companion.GetEntity().animator.AddAnimation("Idle", companionIdle);
-    companion.GetEntity().animator.AddAnimation("Walk", companionWalk);
-    companion.GetEntity().animator.Play("Idle");
-
-    companion.SetDialogue({
+    companion.SetDialogue({ 
         "제가 따라갈게요.",
         "너무 빨리 가지 마세요!"
     });
 
     companion.SetBehavior(NPCBehavior::FollowPlayer);
     companion.SetMoveSpeed(3);
-    
 
     npcs.push_back(companion);
 }
@@ -146,6 +134,12 @@ void PlayScene::HandleEvents(SDL_Event& event) {
         }
         if (event.key.keysym.sym == SDLK_3) {
             dialogueBox.SelectChoice(2);
+        }
+        if (event.key.keysym.sym == SDLK_F5) {
+            saveManager->Save("save.txt");
+        }
+        if (event.key.keysym.sym == SDLK_F9){
+            saveManager->Load("save.txt");
         }
     }
 }

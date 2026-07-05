@@ -4,9 +4,8 @@
 #include <unordered_map>
 
 #include "Quest.h"
-#include "GameData.h"
-#include "ItemDatabase.h"
-#include "QuestDatabase.h"
+
+class GameData;
 
 class QuestManager {
 public:

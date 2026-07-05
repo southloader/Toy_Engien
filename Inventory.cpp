@@ -1,6 +1,8 @@
 #include "Inventory.h"
 #include <cstdio>
 
+void Inventory::Clear() { slots.clear();};
+
 void Inventory::AddItem(const Item& item){
     for(auto& slot : slots) {
         if(slot.item.id == item.id && slot.count < slot.item.maxStack) {

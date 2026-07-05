@@ -504,3 +504,297 @@ Planned Features:
 - Equipment System
 - Character Auto Loader
 - Asset Manifest
+
+# Development Log
+
+## Save System (Phase 1)
+
+Implemented a basic Save / Load system for runtime game data.
+
+---
+
+### SaveManager
+
+Added a centralized SaveManager responsible for serializing and restoring game state.
+
+```cpp
+SaveManager saveManager(&gameData);
+
+saveManager.Save("save.txt");
+
+saveManager.Load("save.txt");
+```
+
+Current SaveManager supports:
+
+- Gold
+- Inventory
+- QuestLog
+
+---
+
+### Gold Serialization
+
+Implemented saving and loading player gold.
+
+Save format:
+
+```text
+Gold 500
+```
+
+---
+
+### Inventory Serialization
+
+Implemented Inventory persistence.
+
+Save format:
+
+```text
+Inventory
+
+potion 5
+
+sword 1
+
+EndInventory
+```
+
+Loading restores item quantities while preserving Inventory stacking behavior.
+
+---
+
+### Quest Serialization
+
+Implemented Quest state persistence.
+
+Save format:
+
+```text
+Quest
+
+collect_potion 1
+
+slime_hunt 2
+
+EndQuest
+```
+
+Supported quest states:
+
+```cpp
+Available
+Active
+Completed
+```
+
+Quest restoration is now integrated with QuestDatabase.
+
+```cpp
+Quest quest =
+    QuestDatabase::Get(id);
+
+quest.state =
+    static_cast<QuestState>(state);
+
+questLog.AddQuest(quest);
+```
+
+---
+
+### Load Reset Support
+
+Fixed an issue where loading duplicated existing runtime data.
+
+Added clear functionality to Inventory and QuestLog.
+
+```cpp
+inventory.Clear();
+
+questLog.Clear();
+```
+
+Load now restores the exact saved state instead of appending data.
+
+---
+
+## Character Database Improvements
+
+Refactored Character registration workflow.
+
+Introduced a builder-style CharacterData API.
+
+Example:
+
+```cpp
+CharacterData player("player");
+
+player.AddAnimation(
+    "Idle",
+    {
+        "player_idle"
+    },
+    1000
+);
+
+player.AddAnimation(
+    "Walk",
+    {
+        "player_walk_1",
+        "player_walk_2",
+        "player_walk_3"
+    },
+    120
+);
+
+player.SetDefaultAnimation(
+    "Idle"
+);
+
+CharacterDatabase::Register(
+    player
+);
+```
+
+Goals:
+
+- AI-friendly API design
+- Flexible asset registration
+- Reduced hardcoded animation setup
+- Minimal file naming constraints
+
+---
+
+## CharacterDatabase Integration
+
+NPC animation setup has been migrated to CharacterDatabase.
+
+Previous approach:
+
+```cpp
+Animation idle;
+
+Animation walk;
+
+animator.AddAnimation(...);
+```
+
+Current approach:
+
+```cpp
+npc.GetEntity().LoadCharacter(
+
+    CharacterDatabase::Get(
+
+        "npc"
+
+    ),
+
+    textureManager
+
+);
+```
+
+Benefits:
+
+- Consistent animation setup
+- Reusable character definitions
+- Cleaner PlayScene implementation
+
+---
+
+# Save System Status
+
+```text
+Save System
+
+███████░░░ 70%
+```
+
+Implemented
+
+- SaveManager
+- Gold Save/Load
+- Inventory Save/Load
+- Quest Save/Load
+- Runtime State Reset
+- CharacterDatabase Refactoring
+
+---
+
+# Next Goals
+
+Planned Features
+
+- Player Position Save
+- NPC State Save
+- Equipment Save
+- Scene State Save
+- Save Slots
+- JSON Serialization
+- EventManager
+
+---
+
+# Architecture Update
+
+```text
+Database Layer
+
+ItemDatabase
+
+QuestDatabase
+
+CharacterDatabase
+
+──────────────
+
+Runtime Layer
+
+Inventory
+
+QuestManager
+
+Animator
+
+SaveManager
+
+──────────────
+
+Gameplay Layer
+
+Dialogue
+
+Shop
+
+Quest
+
+NPC
+
+──────────────
+
+UI Layer
+
+InventoryUI
+
+QuestUI
+
+Notification
+```
+
+SaveManager has been integrated as the persistence layer of the engine.
+
+---
+
+## Engine Progress
+
+```text
+Quest System
+
+██████████ 100%
+
+Save System
+
+███████░░░ 70%
+```

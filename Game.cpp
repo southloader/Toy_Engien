@@ -1,7 +1,5 @@
 #include "Game.h"
 
-
-
 //Game 생성자
 void Game::Init() {
     //작동 트리거 true
@@ -41,6 +39,9 @@ void Game::Init() {
 
     questManager->RegisterAllFromDatabase();
 
+    //세이브 매니저
+    saveManager = new SaveManager(&gameData);
+    
     //플레이어와 적을 생성. 엔티티들은 엔티티 벡터에 저장.
     for(int i = 0; i < 5; i++){
         Entity e;
@@ -68,7 +69,7 @@ void Game::Init() {
 
     //씬 구성
     sceneManager.AddScene("MainMenu", new MainMenuScene(font));
-    sceneManager.AddScene("Play", new PlayScene(textureManager, font, &gameData, questManager));
+    sceneManager.AddScene("Play", new PlayScene(textureManager, font, &gameData, questManager, saveManager));
     sceneManager.AddScene("Pause", new PauseScene(font));
     sceneManager.AddScene("Shop", new ShopScene(font, &gameData));
     sceneManager.AddScene("Inventory", new InventoryScene(font, &gameData));
@@ -105,6 +106,8 @@ void Game::Clean() {
 
     delete questManager;
     questManager = nullptr;
+
+    delete saveManager;
 }
 
 void Game::ShowExitConfirm(){
