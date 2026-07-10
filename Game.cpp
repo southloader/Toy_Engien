@@ -35,13 +35,15 @@ void Game::Init() {
     //퀘스트 데이터 베이스 초기화
     QuestDatabase::Init();
 
-    questManager = new QuestManager(&gameData);
+    gameData.inventory.SetEventManager(&eventManager);
+
+    questManager = new QuestManager(&gameData, &eventManager);
 
     questManager->RegisterAllFromDatabase();
 
     //세이브 매니저
     saveManager = new SaveManager(&gameData);
-    
+
     //플레이어와 적을 생성. 엔티티들은 엔티티 벡터에 저장.
     for(int i = 0; i < 5; i++){
         Entity e;
@@ -69,7 +71,7 @@ void Game::Init() {
 
     //씬 구성
     sceneManager.AddScene("MainMenu", new MainMenuScene(font));
-    sceneManager.AddScene("Play", new PlayScene(textureManager, font, &gameData, questManager, saveManager));
+    sceneManager.AddScene("Play", new PlayScene(textureManager, font, &gameData, questManager, saveManager,&eventManager));
     sceneManager.AddScene("Pause", new PauseScene(font));
     sceneManager.AddScene("Shop", new ShopScene(font, &gameData));
     sceneManager.AddScene("Inventory", new InventoryScene(font, &gameData));

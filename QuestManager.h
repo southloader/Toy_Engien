@@ -7,9 +7,11 @@
 
 class GameData;
 
+class EventManager;
+
 class QuestManager {
 public:
-    QuestManager(GameData* gameData);
+    QuestManager(GameData* gameData, EventManager* eventManager);
     Quest* GetQuest(const std::string& id);
 
     void RegisterQuest(const Quest& quest);
@@ -17,6 +19,7 @@ public:
     bool AcceptQuest(const std::string& id);
     bool AbandonQuest(const std::string& id);
     void UpdateQuestProgress();
+    void UpdateCollectQuestProgress(const std::string& itemId);
     bool CanComplete(const std::string& id);
     QuestResult CompleteQuest(const std::string& id);
     bool GiveReward(const std::string& id);
@@ -26,6 +29,7 @@ public:
 
 private:
     GameData* gameData;
+    EventManager* eventManager;
 
     std::unordered_map<std::string, Quest> questDatabase;
 };

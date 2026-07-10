@@ -16,9 +16,11 @@
 
 class SaveManager;
 
+class EventManager;
+
 class PlayScene : public Scene {
 public:
-    PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager, SaveManager* saveManager);
+    PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager, SaveManager* saveManager, EventManager* eventManager);
     ~PlayScene();
 
     void Update() override;
@@ -44,6 +46,7 @@ private:
     QuestManager* questManager;
     QuestNotification questNotification;
     SaveManager* saveManager;
+    EventManager* eventManager;
     
     int playerSpeed = 3;
 

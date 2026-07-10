@@ -1,16 +1,23 @@
 #include "PlayScene.h"
 #include "CharacterDatabase.h"
 #include "SaveManager.h"
+#include "EventManager.h"
 #include <cstdio>
 
-PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager, SaveManager* saveManager) {
+PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager, SaveManager* saveManager, EventManager* eventManager) {
     this->textureManager = textureManager;
     this->font = font;
     this->gameData = gameData;
     this->questManager = questManager;
     this->saveManager = saveManager;
+    this->eventManager = eventManager;
 
     request = SceneRequest::None;
+
+    eventManager->Subscribe(EventType::QuestAccepted,[this](const Event& event) {questNotification.Show("Quest Accepted!");});
+    eventManager->Subscribe(EventType::QuestCompleted,[this](const Event& event) {questNotification.Show("Quest Complete!");});
+    eventManager->Subscribe(EventType::QuestAbandoned,[this](const Event& event) {questNotification.Show("Quest Abandoned");});
+
 
     camera.x = 0;
     camera.y = 0;
@@ -139,7 +146,10 @@ void PlayScene::HandleEvents(SDL_Event& event) {
             saveManager->Save("save.txt");
         }
         if (event.key.keysym.sym == SDLK_F9){
-            saveManager->Load("save.txt");
+            bool loaded = saveManager->Load("save.txt");
+            if (loaded) {
+                questManager->UpdateQuestProgress();
+            }
         }
     }
 }
@@ -167,7 +177,6 @@ void PlayScene::ProcessDialogueAction() {
 
         if (quest != nullptr) {
             if (accepted) {
-                questNotification.Show("Quest Accepted!");
                 dialogueBox.Show("동료", quest->acceptDialogue);
             }
             else {
@@ -177,9 +186,7 @@ void PlayScene::ProcessDialogueAction() {
     }
     else if (action == DialogueAction::AbandonQuest) {
         bool abandoned = questManager->AbandonQuest(questId);
-
         if (abandoned) {
-            questNotification.Show("Quest Abandoned!");
             dialogueBox.Show("동료", {"알겠습니다.", "다음에 하셔도 돼요!"});
         }
         else {
@@ -194,7 +201,6 @@ void PlayScene::ProcessDialogueAction() {
             dialogueBox.Show("System", {"퀘스트를 찾을 수 없습니다."});
         }
         else if (result == QuestResult::Success) {
-            questNotification.Show("Quest Complete!");
             dialogueBox.Show("동료", quest->completeDialogue);
         }
         else if (result == QuestResult::ConditionNotMet) {
@@ -353,9 +359,6 @@ void PlayScene::Update() {
     for (auto& npc : npcs) {
         npc.Update(player);
     }
-
-    questManager->UpdateQuestProgress();
-
     ProcessDialogueAction();
     questNotification.Update();
 }

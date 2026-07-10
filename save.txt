@@ -1,5 +1,7 @@
-Gold500
+Gold450
 Inventory
+old_sword 1
 EndInventory
 Quest
+collect_potion 2
 EndQuest

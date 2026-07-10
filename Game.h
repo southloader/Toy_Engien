@@ -14,6 +14,7 @@
 #include "QuestScene.h"
 #include "CharacterDatabase.h"
 #include "SaveManager.h"
+#include "EventManager.h"
 
 
 enum class GameState {
@@ -48,4 +49,5 @@ private:
     GameData gameData;
     QuestManager* questManager;
     SaveManager* saveManager;
+    EventManager eventManager;
 };

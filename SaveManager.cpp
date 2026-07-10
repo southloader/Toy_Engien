@@ -81,9 +81,7 @@ bool SaveManager::Load(const std::string& filename){
 
                 Item item = ItemDatabase::Get(id);
 
-                for(int i = 0; i < count; i++) {
-                    gameData->inventory.AddItem(item);
-                }
+                gameData->inventory.RestoreItem(item, count);
             }
         }
         else if(type == "Quest") {

@@ -3,10 +3,23 @@
 #include "ItemDatabase.h"
 #include "QuestDatabase.h"
 #include "InventorySlot.h"
+#include "EventManager.h"
 #include <cstdio>
 
-QuestManager::QuestManager(GameData* gameData) {
+QuestManager::QuestManager(GameData* gameData, EventManager* eventManager) {
     this->gameData = gameData;
+    this->eventManager = eventManager;
+
+    if (this->eventManager != nullptr) {
+        this->eventManager->Subscribe(
+            EventType::ItemAdded,
+            [this](const Event& event) {UpdateCollectQuestProgress(event.subjectId);}
+        );
+        this->eventManager->Subscribe(
+            EventType::ItemRemoved,
+            [this](const Event& event) {UpdateCollectQuestProgress(event.subjectId);}
+        );
+    }
 }
 
 Quest* QuestManager::GetQuest(const std::string& id) {
@@ -43,7 +56,13 @@ bool QuestManager::AcceptQuest(const std::string& id) {
 
     gameData->questLog.AddQuest(quest);
 
-    printf("Quest accepted: %s\n", quest.title.c_str());
+    if (quest.type == QuestType::CollectItem) {
+        UpdateCollectQuestProgress(quest.targetId);
+    }
+
+    if (eventManager != nullptr) {
+        eventManager->Emit({EventType::QuestAccepted, quest.id, 0});
+    }
     return true;
 }
 
@@ -62,7 +81,9 @@ bool QuestManager::AbandonQuest(const std::string& id) {
 
     gameData->questLog.RemoveQuest(id);
 
-    printf("Quest abandoned: %s\n", id.c_str());
+    if (eventManager != nullptr) {
+        eventManager->Emit({EventType::QuestAbandoned, id, 0});
+    }
     return true;
 }
 
@@ -105,6 +126,10 @@ QuestResult QuestManager::CompleteQuest(const std::string& id) {
     quest->currentCount = quest->targetCount;
     
     GiveReward(id);
+
+    if (eventManager != nullptr) {
+        eventManager->Emit({EventType::QuestCompleted, quest->id, quest->rewardAmount});
+    }
 
     return QuestResult::Success;
 }
@@ -167,6 +192,34 @@ void QuestManager::UpdateQuestProgress() {
             if (quest.currentCount > quest.targetCount) {
                 quest.currentCount = quest.targetCount;
             }
+        }
+    }
+}
+
+void QuestManager::UpdateCollectQuestProgress(const std::string& itemId) {
+    auto& quests = gameData->questLog.GetMutableQuests();
+
+    for (auto& quest : quests) {
+        if (quest.state != QuestState::Active) {
+            continue;
+        }
+
+        if (quest.type != QuestType::CollectItem) {
+            continue;
+        }
+
+        if (quest.targetId != itemId) {
+            continue;
+        }
+
+        const InventorySlot* slot =
+            gameData->inventory.GetSlot(itemId);
+
+        quest.currentCount =
+            slot != nullptr ? slot->count : 0;
+
+        if (quest.currentCount > quest.targetCount) {
+            quest.currentCount = quest.targetCount;
         }
     }
 }
