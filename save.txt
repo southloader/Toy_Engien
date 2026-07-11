@@ -1,7 +1,7 @@
-Gold450
+Gold350
 Inventory
-old_sword 1
+potion 3
 EndInventory
 Quest
-collect_potion 2
+collect_potion 1
 EndQuest

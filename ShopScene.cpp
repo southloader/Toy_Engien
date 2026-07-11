@@ -62,23 +62,25 @@ void ShopScene::Render(SDL_Renderer* renderer){
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderDrawRect(renderer, &panel);
 
-    std::string goldText = "보유 골드: " + std::to_string(gameData->gold) + "G";
+    std::string goldText = "보유 골드: " + std::to_string(gameData->GetGold()) + "G";
     RenderText(renderer, font, goldText, 250, 140);
 
     uiManager.Render(renderer, font);  
 }
 
-void ShopScene::BuyItem(const Item& item, int price){
-    if (gameData->gold >= price) {
-        gameData->gold -= price;
-        gameData->inventory.AddItem(item);
+void ShopScene::BuyItem(const std::string& itemId,int price) {
+    if (gameData == nullptr) return;
 
-        printf("Bought %s for %dG\n",item.name.c_str(), price);
-        printf("Gold left: %d\n", gameData->gold);
-    }
-    else {
+    Item item = ItemDatabase::Get(itemId);
+
+    if (item.id == "none") return;
+
+    if (!gameData->SpendGold(price)) {
         printf("Not enough gold\n");
+        return;
     }
+
+    gameData->inventory.AddItem(item);
 }
 
 void ShopScene::HandleEvents(SDL_Event& event) {
@@ -86,13 +88,14 @@ void ShopScene::HandleEvents(SDL_Event& event) {
         int mouseX = event.button.x;
         int mouseY = event.button.y;
 
-        std::string clickedId = uiManager.GetClickedButtonId(mouseX, mouseY);
-        
+        std::string clickedId =
+            uiManager.GetClickedButtonId(mouseX, mouseY);
+
         if (clickedId == "potion") {
-            BuyItem(ItemDatabase::Get("potion"), 50);
+            BuyItem("potion", 50);
         }
         else if (clickedId == "sword") {
-            BuyItem(ItemDatabase::Get("old_sword"), 100);
+            BuyItem("old_sword", 100);
         }
         else if (clickedId == "close") {
             request = SceneRequest::CloseOverlay;

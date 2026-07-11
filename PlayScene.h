@@ -46,7 +46,14 @@ private:
     QuestManager* questManager;
     QuestNotification questNotification;
     SaveManager* saveManager;
-    EventManager* eventManager;
+    EventManager* eventManager = nullptr;
+
+    unsigned int questAcceptedListenerId = 0;
+    unsigned int questCompletedListenerId = 0;
+    unsigned int questAbandonedListenerId = 0;
+
+    unsigned int gameSavedListenerId = 0;
+    unsigned int gameLoadedListenerId = 0;
     
     int playerSpeed = 3;
 

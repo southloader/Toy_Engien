@@ -19,7 +19,7 @@ public:
 
     SceneRequest GetRequest() override;
     void ClearRequest() override;
-    void BuyItem(const Item& item, int price);
+    void BuyItem(const std::string& itemId,int price);
 
 private:
     UIManager uiManager;

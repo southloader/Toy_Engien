@@ -9,11 +9,20 @@
 class EventManager {
 public:
     using Listener = std::function<void(const Event&)>;
+    using ListenerId = unsigned int;
 
-    void Subscribe(EventType type, const Listener& listener);
+    ListenerId Subscribe(EventType type, const Listener& listener);
+
+    bool Unsubscribe(EventType type, ListenerId listenerId);
 
     void Emit(const Event& event);
 
 private:
-    std::map<EventType, std::vector<Listener>> listeners;
+    struct ListenerEntry {
+        ListenerId id;
+        Listener callback;
+    };
+    std::map<EventType, std::vector<ListenerEntry>> listeners;
+
+    ListenerId nextListenerId = 1;
 };

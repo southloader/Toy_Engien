@@ -4,8 +4,9 @@
 #include "QuestDatabase.h"
 #include <string>
 
-SaveManager::SaveManager(GameData* gameData){
+SaveManager::SaveManager(GameData* gameData, EventManager* eventManager){
     this->gameData = gameData;
+    this->eventManager = eventManager;
 }
 
 #include <fstream>
@@ -25,7 +26,7 @@ bool SaveManager::Save(const std::string& filename){
     }
 
     printf("Saving Gold\n");
-    file << "Gold" << gameData->gold << "\n";
+    file << "Gold" << gameData->GetGold() << "\n";
 
     printf("Saving Inventory\n");
     file << "Inventory" << "\n";
@@ -44,6 +45,14 @@ bool SaveManager::Save(const std::string& filename){
     file << "EndQuest" << "\n";
 
     file.close();
+
+    if (eventManager != nullptr) {
+        eventManager->Emit({
+            EventType::GameSaved,
+            filename,
+            0
+        });
+    }
 
     printf("Save Complete\n");
 
@@ -64,7 +73,9 @@ bool SaveManager::Load(const std::string& filename){
 
     while(file >> type) {
         if(type == "Gold") {
-            file >> gameData->gold;
+            int loadedGold = 0;
+            file >> loadedGold;
+            gameData->RestoreGold(loadedGold);
         }
         else if (type == "Inventory") {
             while(true) {
@@ -105,5 +116,14 @@ bool SaveManager::Load(const std::string& filename){
     }
 
     file.close();
+
+    if (eventManager != nullptr) {
+        eventManager->Emit({
+            EventType::GameLoaded,
+            filename,
+            0
+        });
+    }
+
     return true;
 }

@@ -42,22 +42,21 @@ bool Inventory::HasItem(const std::string& id) {
 
 bool Inventory::RemoveItem(const std::string& id) {
     for (auto it = slots.begin(); it != slots.end(); ++it) {
-        if (it->item.id == id) {
+        if (it->item.id != id) {
+            continue;
+        }
 
-            it->count--;
+        it->count--;
 
-            if (it->count <= 0) {
-                printf("Item removed: %s\n", it->item.name.c_str());
-                slots.erase(it);
-            }
-            if (eventManager != nullptr) {
-                eventManager->Emit({EventType::ItemRemoved, id , 1});
-            }
+        if (it->count <= 0) {
+            slots.erase(it);
+        }
+        if (eventManager != nullptr) {
+            eventManager->Emit({EventType::ItemRemoved, id , 1});
+        }
 
             return true;
-        }
     }
-
     return false;
 }
 

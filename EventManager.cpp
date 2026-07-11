@@ -1,7 +1,39 @@
 #include "EventManager.h"
 
-void EventManager::Subscribe(EventType type, const Listener& listener){
-    listeners[type].push_back(listener);
+#include <algorithm>
+
+EventManager::ListenerId EventManager::Subscribe(EventType type, const Listener& listener){
+    ListenerId id = nextListenerId++;
+    listeners[type].push_back({id, listener});
+
+    return id;
+}
+
+bool EventManager::Unsubscribe(EventType type, ListenerId listenerId){
+    auto found = listeners.find(type);
+    if (found == listeners.end()){
+        return false;
+    }
+    auto& entries = found->second;
+
+    auto newEnd = std::remove_if(
+        entries.begin(), 
+        entries.end(), 
+        [listenerId](const ListenerEntry& entry){
+            return entry.id == listenerId;
+        }
+    );
+
+    if (newEnd == entries.end()) {
+        return false;
+    }
+
+    entries.erase(newEnd, entries.end());
+
+    if (entries.empty()) {
+        listeners.erase(found);
+    }
+    return true;
 }
 
 void EventManager::Emit(const Event& event){
@@ -11,7 +43,9 @@ void EventManager::Emit(const Event& event){
         return;
     }
 
-    for (const auto& listener : found->second) {
-        listener(event);
+    const auto entries = found->second;
+
+    for (const auto& entry : entries) {
+        entry.callback(event);
     }
 }

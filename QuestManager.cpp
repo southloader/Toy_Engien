@@ -151,7 +151,7 @@ bool QuestManager::GiveReward(const std::string& id) {
         gameData->inventory.AddItem(ItemDatabase::Get(quest->rewardItemId));
     }
 
-    gameData->gold += quest->rewardGold;
+    gameData->AddGold(quest->rewardGold);
 
     printf("Reward given for quest: %s\n", quest->title.c_str());
     printf("item: %s, Gold: %d\n", quest->rewardItemId.c_str(), quest->rewardGold);

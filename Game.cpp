@@ -35,14 +35,14 @@ void Game::Init() {
     //퀘스트 데이터 베이스 초기화
     QuestDatabase::Init();
 
-    gameData.inventory.SetEventManager(&eventManager);
+    gameData.SetEventManager(&eventManager);
 
     questManager = new QuestManager(&gameData, &eventManager);
 
     questManager->RegisterAllFromDatabase();
 
     //세이브 매니저
-    saveManager = new SaveManager(&gameData);
+    saveManager = new SaveManager(&gameData, &eventManager);
 
     //플레이어와 적을 생성. 엔티티들은 엔티티 벡터에 저장.
     for(int i = 0; i < 5; i++){

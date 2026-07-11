@@ -14,10 +14,11 @@ PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* g
 
     request = SceneRequest::None;
 
-    eventManager->Subscribe(EventType::QuestAccepted,[this](const Event& event) {questNotification.Show("Quest Accepted!");});
-    eventManager->Subscribe(EventType::QuestCompleted,[this](const Event& event) {questNotification.Show("Quest Complete!");});
-    eventManager->Subscribe(EventType::QuestAbandoned,[this](const Event& event) {questNotification.Show("Quest Abandoned");});
-
+    questAcceptedListenerId = eventManager->Subscribe(EventType::QuestAccepted,[this](const Event& event) {questNotification.Show("Quest Accepted!");});
+    questCompletedListenerId = eventManager->Subscribe(EventType::QuestCompleted,[this](const Event& event) {questNotification.Show("Quest Complete!");});
+    questAbandonedListenerId = eventManager->Subscribe(EventType::QuestAbandoned,[this](const Event& event) {questNotification.Show("Quest Abandoned");});
+    gameSavedListenerId = eventManager->Subscribe(EventType::GameSaved,[this](const Event& event) {questNotification.Show("Game Saved!");});
+    gameLoadedListenerId = eventManager->Subscribe(EventType::GameLoaded,[this](const Event& event) {questNotification.Show("Game Loaded!");});
 
     camera.x = 0;
     camera.y = 0;
@@ -468,6 +469,18 @@ bool PlayScene::IsNear(Entity& a, Entity& b, int distance) {
 }
 
 PlayScene::~PlayScene() {
+    if (eventManager != nullptr) {
+        eventManager->Unsubscribe(EventType::QuestAccepted,questAcceptedListenerId);
+
+        eventManager->Unsubscribe(EventType::QuestCompleted,questCompletedListenerId);
+
+        eventManager->Unsubscribe(EventType::QuestAbandoned,questAbandonedListenerId);
+
+        eventManager->Unsubscribe(EventType::GameSaved,gameSavedListenerId);
+
+        eventManager->Unsubscribe(EventType::GameLoaded,gameLoadedListenerId);
+    }
+
     delete tileMap;
     tileMap = nullptr;
 }
