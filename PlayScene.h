@@ -13,6 +13,7 @@
 #include "GameData.h"
 #include "QuestManager.h"
 #include "QuestNotification.h"
+#include "CombatSystem.h"
 
 class SaveManager;
 
@@ -35,11 +36,11 @@ public:
 
 private:
     std::vector<Entity> entities;
+    std::vector<NPC> npcs;
     TextureManager* textureManager;
     TileMap* tileMap;
     SceneRequest request;
     Camera camera;
-    std::vector<NPC> npcs;
     DialogueBox dialogueBox;
     TTF_Font* font;
     GameData* gameData;
@@ -47,11 +48,12 @@ private:
     QuestNotification questNotification;
     SaveManager* saveManager;
     EventManager* eventManager = nullptr;
+    CombatSystem combatSystem;
 
     unsigned int questAcceptedListenerId = 0;
     unsigned int questCompletedListenerId = 0;
     unsigned int questAbandonedListenerId = 0;
-
+    unsigned int enemyKilledListenerId = 0;
     unsigned int gameSavedListenerId = 0;
     unsigned int gameLoadedListenerId = 0;
     
@@ -62,10 +64,14 @@ private:
     void InitNPCs();
     
     void UpdatePlayer();
+    void UpdateEntities();
     void UpdateCamera(Entity& player);
     void CheckNPCInteraction();
 
     void MovePlayer(Entity& player, int moveX, int moveY);
     void MoveAndCollideX(Entity& entity, int moveX);
     void MoveAndCollideY(Entity& entity, int moveY);
+
+    Entity* GetFirstEnemy();
+    void TestPlayerAttack();
 };

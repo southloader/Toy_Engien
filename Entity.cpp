@@ -47,6 +47,8 @@ void Entity::LoadCharacter(
     const CharacterData& data,
     TextureManager* textureManager
 ) {
+    characterId = data.id;
+    combatStats = data.combatStats;
     for (const auto& pair : data.animations) {
         const std::string& animName = pair.first;
         const AnimationData& animData = pair.second;

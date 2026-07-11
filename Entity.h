@@ -1,7 +1,9 @@
 #pragma once
+
 #include "Camera.h"
 #include "Animator.h"
 #include "CharacterData.h"
+#include "CombatStats.h"
 #include "TextureManager.h"
 
 enum EntityType {
@@ -18,15 +20,31 @@ enum class Direction {
 
 class Entity {
 public:
-    int x, y;
-    int width, height;
-    EntityType type;
+    std::string characterId;
+    int x = 0;
+    int y = 0;
+
+    int width = 0;
+    int height = 0;
+
+    EntityType type = OBJ;
     Direction direction = Direction::Right;
 
-    bool CheckCollision(Entity& other);
-    void LoadCharacter(const CharacterData& data, TextureManager* textureManager);
     SDL_Texture* texture = nullptr;
     Animator animator;
 
-    void Render(SDL_Renderer* renderer, Camera camera);
+    // 해당 Entity만의 현재 전투 상태
+    CombatStats combatStats;
+
+    bool CheckCollision(Entity& other);
+
+    void LoadCharacter(
+        const CharacterData& data,
+        TextureManager* textureManager
+    );
+
+    void Render(
+        SDL_Renderer* renderer,
+        Camera camera
+    );
 };

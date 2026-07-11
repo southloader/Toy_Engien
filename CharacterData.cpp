@@ -14,3 +14,7 @@ void CharacterData::AddAnimation(const std::string& name, const std::vector<std:
 void CharacterData::SetDefaultAnimation(const std::string& name) {
     defaultAnimation = name;
 }
+
+void CharacterData::SetCombatStats(const CombatStats& stats) {
+    combatStats = stats;
+}

@@ -11,6 +11,8 @@ PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* g
     this->questManager = questManager;
     this->saveManager = saveManager;
     this->eventManager = eventManager;
+    
+    combatSystem.SetEventManager(eventManager);
 
     request = SceneRequest::None;
 
@@ -19,6 +21,7 @@ PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* g
     questAbandonedListenerId = eventManager->Subscribe(EventType::QuestAbandoned,[this](const Event& event) {questNotification.Show("Quest Abandoned");});
     gameSavedListenerId = eventManager->Subscribe(EventType::GameSaved,[this](const Event& event) {questNotification.Show("Game Saved!");});
     gameLoadedListenerId = eventManager->Subscribe(EventType::GameLoaded,[this](const Event& event) {questNotification.Show("Game Loaded!");});
+    enemyKilledListenerId  = eventManager->Subscribe(EventType::EnemyKilled,[this](const Event& event) {questNotification.Show("Enemy Defeated!");});
 
     camera.x = 0;
     camera.y = 0;
@@ -44,6 +47,25 @@ void PlayScene::InitEntities() {
     player.LoadCharacter(CharacterDatabase::Get("player"), textureManager);
 
     entities.push_back(player);
+
+    Entity slime;
+
+    slime.x = 400;
+    slime.y = 250;
+    slime.width = 50;
+    slime.height = 50;
+    slime.type = ENEMY;
+
+    slime.LoadCharacter(CharacterDatabase::Get("slime"),textureManager);
+    entities.push_back(slime);
+
+    printf(
+        "[Slime Created] HP: %d / %d, ATK: %d, DEF: %d\n",
+        slime.combatStats.GetCurrentHealth(),
+        slime.combatStats.GetMaxHealth(),
+        slime.combatStats.GetAttack(),
+        slime.combatStats.GetDefense()
+    );
 }
 
 Entity* PlayScene::GetPlayer() {
@@ -54,6 +76,57 @@ Entity* PlayScene::GetPlayer() {
     }
 
     return nullptr;
+}
+
+Entity* PlayScene::GetFirstEnemy() {
+    for (auto& entity : entities){
+        if (entity.type == ENEMY){
+            return &entity;
+        }
+    }
+    return nullptr;
+}
+
+void PlayScene::TestPlayerAttack() {
+    Entity* player = GetPlayer();
+    Entity* enemy = GetFirstEnemy();
+
+    if (player == nullptr){
+        std::printf(
+            "[Combat] Player not found.\n"
+        );
+
+        return;
+    }
+
+    if (enemy == nullptr){
+        std::printf(
+            "[Combat] Enemy not found.\n"
+        );
+
+        return;
+    }
+
+    AttackResult result =
+        combatSystem.Attack(
+            *player,
+            *enemy
+        );
+
+    if (!result.success){
+        std::printf(
+            "[Combat] Attack failed.\n"
+        );
+
+        return;
+    }
+
+    if (result.targetDefeated){
+        std::printf(
+            "[Combat] %s was defeated.\n",
+            enemy->characterId.c_str()
+        );
+    }
 }
 
 void PlayScene::InitNPCs() {
@@ -152,6 +225,10 @@ void PlayScene::HandleEvents(SDL_Event& event) {
                 questManager->UpdateQuestProgress();
             }
         }
+        if (event.key.keysym.sym == SDLK_SPACE) {
+            TestPlayerAttack();
+        }
+
     }
 }
 
@@ -354,6 +431,7 @@ void PlayScene::MoveAndCollideY(Entity& entity, int moveY) {
 
 void PlayScene::Update() {
     UpdatePlayer();
+    UpdateEntities();
 
     Entity* player = GetPlayer();
 
@@ -362,6 +440,12 @@ void PlayScene::Update() {
     }
     ProcessDialogueAction();
     questNotification.Update();
+}
+
+void PlayScene::UpdateEntities() {
+    for (auto& entity : entities) {
+        entity.animator.Update();
+    }
 }
 
 void PlayScene::UpdatePlayer() {
@@ -405,9 +489,6 @@ void PlayScene::UpdatePlayer() {
         else {
             e.animator.Play("Walk");
         }
-
-        e.animator.Update();
-
         UpdateCamera(e);
     }
 }
@@ -437,6 +518,9 @@ void PlayScene::UpdateCamera(Entity& player) {
 void PlayScene::Render(SDL_Renderer* renderer) {
     tileMap->Render(renderer, camera);
     for (auto& e : entities) {
+        if (e.type == ENEMY && e.combatStats.IsDead()){
+            continue;
+        }
         e.Render(renderer, camera);
     }
     for (auto& npc : npcs) {
@@ -471,14 +555,11 @@ bool PlayScene::IsNear(Entity& a, Entity& b, int distance) {
 PlayScene::~PlayScene() {
     if (eventManager != nullptr) {
         eventManager->Unsubscribe(EventType::QuestAccepted,questAcceptedListenerId);
-
         eventManager->Unsubscribe(EventType::QuestCompleted,questCompletedListenerId);
-
         eventManager->Unsubscribe(EventType::QuestAbandoned,questAbandonedListenerId);
-
         eventManager->Unsubscribe(EventType::GameSaved,gameSavedListenerId);
-
         eventManager->Unsubscribe(EventType::GameLoaded,gameLoadedListenerId);
+        eventManager->Unsubscribe(EventType::GameLoaded,enemyKilledListenerId);
     }
 
     delete tileMap;
