@@ -69,6 +69,10 @@ void DialogueBox::SelectChoice(int index){
     currentLine = 0;
 }
 
+const std::string& DialogueBox::GetSpeakerName() const {
+    return speakerName;
+}
+
 void DialogueBox::Render(SDL_Renderer* renderer, TTF_Font* font) {
     if (!visible) return;
     if (font == nullptr) return;

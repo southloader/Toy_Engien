@@ -43,6 +43,55 @@ void QuestDatabase::Init() {
     };
 
     quests[collectPotion.id] = collectPotion;
+
+    Quest killSlime;
+
+    killSlime.id = "kill_slime";
+    killSlime.title = "Slime Hunter";
+    killSlime.description = "Defeat 1 slime.";
+
+    killSlime.state = QuestState::Available;
+    killSlime.type = QuestType::KillMonster;
+
+    // 처치 퀘스트는 아이템을 소비하지 않는다.
+    killSlime.consumeTargetItem = false;
+
+    // CombatSystem의 EnemyKilled 이벤트 subjectId와 같아야 한다.
+    killSlime.targetId = "slime";
+    killSlime.targetCount = 1;
+    killSlime.currentCount = 0;
+
+    killSlime.rewardItemId = "potion";
+    killSlime.rewardAmount = 1;
+    killSlime.rewardGold = 50;
+
+    killSlime.offerDialogue =
+        "마을 근처에 슬라임이 나타났네. 한 마리만 처치해 주겠나?";
+
+    killSlime.acceptDialogue =
+    {
+        "고맙네.",
+        "슬라임 한 마리를 처치하고 돌아오게."
+    };
+
+    killSlime.progressDialogue =
+    {
+        "아직 슬라임을 처치하지 못했군.",
+        "마을 근처를 다시 살펴보게."
+    };
+
+    killSlime.completeDialogue =
+    {
+        "슬라임을 처치했군!",
+        "약속한 보상을 주겠네."
+    };
+
+    killSlime.alreadyCompletedDialogue =
+    {
+        "덕분에 마을이 한동안 조용할 것 같네.",
+        "수고했네."
+    };
+    quests[killSlime.id] = killSlime;
 }
 
 Quest QuestDatabase::Get(const std::string& id) {

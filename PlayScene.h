@@ -72,6 +72,8 @@ private:
     void MoveAndCollideX(Entity& entity, int moveX);
     void MoveAndCollideY(Entity& entity, int moveY);
 
+    void ShowQuestInteraction(NPC& npc);
+
     Entity* GetFirstEnemy();
     void TestPlayerAttack();
 };

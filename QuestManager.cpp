@@ -1,29 +1,74 @@
 #include "QuestManager.h"
+
+#include <cstdio>
+#include <algorithm>
+
 #include "GameData.h"
 #include "ItemDatabase.h"
 #include "QuestDatabase.h"
 #include "InventorySlot.h"
 #include "EventManager.h"
-#include <cstdio>
 
-QuestManager::QuestManager(GameData* gameData, EventManager* eventManager) {
-    this->gameData = gameData;
-    this->eventManager = eventManager;
+QuestManager::QuestManager(GameData* gameData, EventManager* eventManager) : gameData(gameData), eventManager(eventManager) {
+    if (this->eventManager == nullptr) {
+        return;
+    }
 
-    if (this->eventManager != nullptr) {
-        this->eventManager->Subscribe(
-            EventType::ItemAdded,
-            [this](const Event& event) {UpdateCollectQuestProgress(event.subjectId);}
-        );
-        this->eventManager->Subscribe(
-            EventType::ItemRemoved,
-            [this](const Event& event) {UpdateCollectQuestProgress(event.subjectId);}
-        );
+    itemAddedListenerId = this->eventManager->Subscribe(
+        EventType::ItemAdded,
+        [this](const Event& event) {
+                UpdateCollectQuestProgress(
+                    event.subjectId
+            );
+        }
+    );
+
+    itemRemovedListenerId = this->eventManager->Subscribe(
+        EventType::ItemRemoved,
+        [this](const Event& event) {
+            UpdateCollectQuestProgress(
+                event.subjectId
+            );
+        }
+    );
+
+    enemyKilledListenerId = this->eventManager->Subscribe(
+        EventType::EnemyKilled,
+        [this](const Event& event) {
+            UpdateKillQuestProgress(
+                event.subjectId,
+                event.amount
+            );
+        }
+    );
+}
+
+QuestManager::~QuestManager() {
+    if (eventManager == nullptr){
+        return;
+    }
+    if (itemAddedListenerId != 0){
+        eventManager->Unsubscribe(EventType::ItemAdded, itemAddedListenerId);
+    }
+    if (itemRemovedListenerId != 0){
+        eventManager->Unsubscribe(EventType::ItemRemoved,itemRemovedListenerId);
+    }
+    if (enemyKilledListenerId != 0){
+        eventManager->Unsubscribe(EventType::EnemyKilled,enemyKilledListenerId);
     }
 }
 
 Quest* QuestManager::GetQuest(const std::string& id) {
     return gameData->questLog.GetQuest(id);
+}
+
+const Quest* QuestManager::GetQuestDefinition(const std::string& id) const {
+    auto found = questDatabase.find(id);
+    if (found == questDatabase.end()) {
+        return nullptr;
+    }
+
+    return &found->second;
 }
 
 void QuestManager::RegisterQuest(const Quest& quest) {
@@ -93,12 +138,19 @@ bool QuestManager::CanComplete(const std::string& id) {
     if(quest == nullptr)
         return false;
 
+    if (quest->state != QuestState::Active)
+        return false;
+
     if(quest->type == QuestType::CollectItem) {
         const InventorySlot* slot = gameData->inventory.GetSlot(quest->targetId);
         if(slot == nullptr)
             return false;
 
         return slot->count >= quest->targetCount;
+    }
+
+    if (quest->type == QuestType::KillMonster) {
+        return quest->currentCount >= quest->targetCount;
     }
 
     return false;
@@ -220,6 +272,30 @@ void QuestManager::UpdateCollectQuestProgress(const std::string& itemId) {
 
         if (quest.currentCount > quest.targetCount) {
             quest.currentCount = quest.targetCount;
+        }
+    }
+}
+
+void QuestManager::UpdateKillQuestProgress(const std::string& enemyId, int killCount) {
+    if (killCount <= 0){
+        return;
+    }
+    auto& quests = gameData->questLog.GetMutableQuests();
+    for (auto& quest : quests) {
+        if (quest.state != QuestState::Active){
+            continue;
+        }
+        if (quest.type != QuestType::KillMonster){
+            continue;
+        }
+        if (quest.targetId != enemyId){
+            continue;
+        }
+        quest.currentCount += killCount;
+        quest.currentCount = std::min(quest.currentCount, quest.targetCount);
+        std::printf("[Quest] %s: %d / %d\n", quest.title.c_str(), quest.currentCount, quest.targetCount);
+        if (quest.currentCount >= quest.targetCount){
+            std::printf("[Quest] Completion condition met: %s\n", quest.title.c_str());
         }
     }
 }

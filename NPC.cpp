@@ -32,6 +32,21 @@ void NPC::SetDialogue(const std::vector<std::string>& lines) {
     dialogueLines = lines;
 }
 
+void NPC::AddQuestInteraction(const QuestInteraction& interaction) {
+    if (interaction.questId.empty()){
+        return;
+    }
+    questInteractions.push_back(interaction);
+}
+
+const std::vector<QuestInteraction>& NPC::GetQuestInteractions() const {
+    return questInteractions;
+}
+
+bool NPC::HasQuestInteractions() const {
+    return !questInteractions.empty();
+}
+
 void NPC::Update(Entity* player) {
     int oldX = entity.x;
     int oldY = entity.y;

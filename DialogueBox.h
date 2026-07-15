@@ -21,7 +21,9 @@ public:
     void Hide();
     void Next();
     bool IsVisible();
-    
+
+    const std::string& GetSpeakerName() const;
+
     void ShowChoices(const std::string& speaker, const std::string& line, const std::vector<DialogueChoice>& choices);
     void SelectChoice(int index);
     std::string GetRequestedQuestId();

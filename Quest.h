@@ -38,6 +38,8 @@ struct Quest {
     int rewardAmount = 1;
     int rewardGold = 0;
 
+    std::string offerDialogue;
+
     std::vector<std::string> acceptDialogue;
     std::vector<std::string> progressDialogue;
     std::vector<std::string> completeDialogue;

@@ -2,8 +2,8 @@
 
 #include <string>
 #include <vector>
-
 #include <cmath>
+
 #include "Entity.h"
 #include "Camera.h"
 #include "TextureManager.h"
@@ -14,6 +14,15 @@ enum class NPCBehavior {
     Patrol,
     FollowPlayer
 };
+
+struct QuestInteraction {
+    std::string questId;
+
+    bool canOffer = false;
+    bool canComplete = false;
+    bool canAbandon = false;
+};
+
 
 class NPC {
 public:
@@ -28,6 +37,10 @@ public:
     void SetPatrolPoints(const std::vector<SDL_Point>& points);
     void SetMoveSpeed(int speed);
 
+    void AddQuestInteraction(const QuestInteraction& interaction);
+    const std::vector<QuestInteraction>& GetQuestInteractions() const;
+    bool HasQuestInteractions() const;
+
     void Update(Entity* player);
     void Render(SDL_Renderer* renderer, Camera camera);
 
@@ -41,6 +54,7 @@ private:
     std::vector<std::string> dialogueLines;
 
     NPCBehavior behavior = NPCBehavior::Idle;
+    std::vector<QuestInteraction> questInteractions;
 
     std::vector<SDL_Point> patrolPoints;
     int currentPatrolIndex = 0;
