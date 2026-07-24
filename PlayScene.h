@@ -14,13 +14,22 @@
 #include "QuestManager.h"
 #include "QuestNotification.h"
 
+#include "SampleCombatSession.h"
+
 class SaveManager;
 
 class EventManager;
 
 class PlayScene : public Scene {
 public:
-    PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager, SaveManager* saveManager, EventManager* eventManager);
+    PlayScene(
+        TextureManager* textureManager, 
+        TTF_Font* font, GameData* gameData, 
+        QuestManager* questManager, 
+        SaveManager* saveManager, 
+        EventManager* eventManager, 
+        SampleCombatSession* sampleCombatSession
+    );
     ~PlayScene();
 
     void Update() override;
@@ -47,6 +56,7 @@ private:
     QuestNotification questNotification;
     SaveManager* saveManager;
     EventManager* eventManager = nullptr;
+    SampleCombatSession* sampleCombatSession = nullptr;
 
     unsigned int questAcceptedListenerId = 0;
     unsigned int questCompletedListenerId = 0;
@@ -70,4 +80,5 @@ private:
     void MoveAndCollideY(Entity& entity, int moveY);
 
     void ShowQuestInteraction(NPC& npc);
+    
 };

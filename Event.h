@@ -15,11 +15,6 @@ enum class EventType {
     QuestCompleted,
     QuestAbandoned,
 
-    // Combat (Future)
-    EnemyKilled,
-    PlayerDamaged,
-    PlayerDead,
-
     // Scene (Future)
     SceneChanged,
 

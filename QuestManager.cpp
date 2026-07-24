@@ -31,16 +31,6 @@ QuestManager::QuestManager(GameData* gameData, EventManager* eventManager) : gam
             );
         }
     );
-
-    enemyKilledListenerId = this->eventManager->Subscribe(
-        EventType::EnemyKilled,
-        [this](const Event& event) {
-            UpdateKillQuestProgress(
-                event.subjectId,
-                event.amount
-            );
-        }
-    );
 }
 
 QuestManager::~QuestManager() {
@@ -52,9 +42,6 @@ QuestManager::~QuestManager() {
     }
     if (itemRemovedListenerId != 0){
         eventManager->Unsubscribe(EventType::ItemRemoved,itemRemovedListenerId);
-    }
-    if (enemyKilledListenerId != 0){
-        eventManager->Unsubscribe(EventType::EnemyKilled,enemyKilledListenerId);
     }
 }
 
@@ -101,7 +88,7 @@ bool QuestManager::AcceptQuest(const std::string& id) {
 
     gameData->questLog.AddQuest(quest);
 
-    if (quest.type == QuestType::CollectItem) {
+    if (quest.objectiveType == QuestObjectiveType::CollectItem) {
         UpdateCollectQuestProgress(quest.targetId);
     }
 
@@ -135,31 +122,33 @@ bool QuestManager::AbandonQuest(const std::string& id) {
 bool QuestManager::CanComplete(const std::string& id) {
     Quest* quest = gameData->questLog.GetQuest(id);
 
-    if(quest == nullptr)
+    if (quest == nullptr){
         return false;
-
-    if (quest->state != QuestState::Active)
-        return false;
-
-    if(quest->type == QuestType::CollectItem) {
-        const InventorySlot* slot = gameData->inventory.GetSlot(quest->targetId);
-        if(slot == nullptr)
-            return false;
-
-        return slot->count >= quest->targetCount;
     }
 
-    if (quest->type == QuestType::KillMonster) {
-        return quest->currentCount >= quest->targetCount;
+    if (quest->state != QuestState::Active){
+        return false;
     }
 
-    return false;
+    // CollectItem 목표도 Inventory 이벤트를 통해
+    // currentCount가 실제 수량과 동기화된다.
+    //
+    // 따라서 모든 목표는 최종적으로
+    // currentCount와 targetCount로 완료 여부를 판정한다.
+    return quest->currentCount >= quest->targetCount;
 }
 
 QuestResult QuestManager::CompleteQuest(const std::string& id) {
     Quest* quest = gameData->questLog.GetQuest(id);
 
     if (quest == nullptr) {
+
+        std::printf(
+            "[QuestManager] Cannot complete quest. "
+            "Quest is not active: %s\n",
+            id.c_str()
+        );
+
         return QuestResult::QuestNotFound;
     }
     if (quest->state == QuestState::Completed) {
@@ -168,7 +157,7 @@ QuestResult QuestManager::CompleteQuest(const std::string& id) {
     if (!CanComplete(id)) {
         return QuestResult::ConditionNotMet;
     }
-    if (quest->consumeTargetItem && quest->type == QuestType::CollectItem) {
+    if (quest->consumeTargetItem && quest->objectiveType == QuestObjectiveType::CollectItem) {
         for (int i = 0; i < quest->targetCount; i++) {
             gameData->inventory.RemoveItem(quest->targetId);
         }
@@ -226,25 +215,16 @@ bool QuestManager::IsCompleted(const std::string& id) {
 
 void QuestManager::UpdateQuestProgress() {
     auto& quests = gameData->questLog.GetMutableQuests();
-
-    for (auto& quest : quests) {
-        if (quest.state != QuestState::Active) continue;
-
-        if (quest.type == QuestType::CollectItem) {
-            const InventorySlot* slot =
-                gameData->inventory.GetSlot(quest.targetId);
-
-            if (slot != nullptr) {
-                quest.currentCount = slot->count;
-            }
-            else {
-                quest.currentCount = 0;
-            }
-
-            if (quest.currentCount > quest.targetCount) {
-                quest.currentCount = quest.targetCount;
-            }
+    for (auto& quest : quests){
+        if (quest.state != QuestState::Active){
+            continue;
         }
+        if (quest.objectiveType != QuestObjectiveType::CollectItem){
+            continue;
+        }
+        const InventorySlot* slot = gameData->inventory.GetSlot(quest.targetId);
+        quest.currentCount = slot != nullptr ? slot->count : 0;
+        quest.currentCount = std::min(quest.currentCount, quest.targetCount);
     }
 }
 
@@ -256,7 +236,7 @@ void QuestManager::UpdateCollectQuestProgress(const std::string& itemId) {
             continue;
         }
 
-        if (quest.type != QuestType::CollectItem) {
+        if (quest.objectiveType != QuestObjectiveType::CollectItem) {
             continue;
         }
 
@@ -276,26 +256,53 @@ void QuestManager::UpdateCollectQuestProgress(const std::string& itemId) {
     }
 }
 
-void QuestManager::UpdateKillQuestProgress(const std::string& enemyId, int killCount) {
-    if (killCount <= 0){
+void QuestManager::ReportObjective(
+    QuestObjectiveType objectiveType,
+    const std::string& targetId,
+    int amount
+) {
+    if (targetId.empty()) {
         return;
     }
+
+    // 아이템 수집 목표는 단순히 +1 하는 것이 아니라
+    // 현재 Inventory의 실제 수량과 동기화한다.
+    if (objectiveType == QuestObjectiveType::CollectItem) {
+        UpdateCollectQuestProgress(
+            targetId
+        );
+
+        return;
+    }
+
+    if (amount <= 0) {
+        return;
+    }
+
     auto& quests = gameData->questLog.GetMutableQuests();
+
     for (auto& quest : quests) {
-        if (quest.state != QuestState::Active){
+        if (quest.state != QuestState::Active) {
             continue;
         }
-        if (quest.type != QuestType::KillMonster){
+
+        if (quest.objectiveType != objectiveType) {
             continue;
         }
-        if (quest.targetId != enemyId){
+
+        if (quest.targetId != targetId) {
             continue;
         }
-        quest.currentCount += killCount;
+
+        quest.currentCount += amount;
+
         quest.currentCount = std::min(quest.currentCount, quest.targetCount);
-        std::printf("[Quest] %s: %d / %d\n", quest.title.c_str(), quest.currentCount, quest.targetCount);
-        if (quest.currentCount >= quest.targetCount){
-            std::printf("[Quest] Completion condition met: %s\n", quest.title.c_str());
-        }
+
+        std::printf(
+            "[Quest Objective] %s: %d / %d\n",
+            quest.title.c_str(),
+            quest.currentCount,
+            quest.targetCount
+        );
     }
 }

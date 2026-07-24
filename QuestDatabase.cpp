@@ -11,7 +11,7 @@ void QuestDatabase::Init() {
     collectPotion.description = "Collect 3 potions.";
 
     collectPotion.state = QuestState::Available;
-    collectPotion.type = QuestType::CollectItem;
+    collectPotion.objectiveType = QuestObjectiveType::CollectItem;
     collectPotion.consumeTargetItem = true;
 
     collectPotion.targetId = "potion";
@@ -51,7 +51,7 @@ void QuestDatabase::Init() {
     killSlime.description = "Defeat 1 slime.";
 
     killSlime.state = QuestState::Available;
-    killSlime.type = QuestType::KillMonster;
+    killSlime.objectiveType = QuestObjectiveType::DefeatTarget;
 
     // 처치 퀘스트는 아이템을 소비하지 않는다.
     killSlime.consumeTargetItem = false;

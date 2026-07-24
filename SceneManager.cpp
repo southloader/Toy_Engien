@@ -45,6 +45,10 @@ void SceneManager::ProcessRequest(bool& running) {
     else if (request == SceneRequest::GoToPause) {
         PushOverlay("Pause");
     }
+    else if (request == SceneRequest::GoToSampleCombat) {
+        PopOverlay();
+        ChangeScene("SampleCombat");
+    }
     else if (request == SceneRequest::OpenShop) {
         PushOverlay("Shop");
     }

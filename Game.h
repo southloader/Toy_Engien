@@ -15,7 +15,8 @@
 #include "CharacterDatabase.h"
 #include "SaveManager.h"
 #include "EventManager.h"
-
+#include "SampleCombatScene.h"
+#include "SampleCombatSession.h"
 
 enum class GameState {
     MainMenu,
@@ -50,4 +51,5 @@ private:
     QuestManager* questManager;
     SaveManager* saveManager;
     EventManager eventManager;
+    SampleCombatSession sampleCombatSession;
 };

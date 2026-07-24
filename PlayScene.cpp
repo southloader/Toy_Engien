@@ -4,13 +4,20 @@
 #include "EventManager.h"
 #include <cstdio>
 
-PlayScene::PlayScene(TextureManager* textureManager, TTF_Font* font, GameData* gameData, QuestManager* questManager, SaveManager* saveManager, EventManager* eventManager) {
+PlayScene::PlayScene(
+    TextureManager* textureManager, 
+    TTF_Font* font, GameData* gameData, 
+    QuestManager* questManager, 
+    SaveManager* saveManager, 
+    EventManager* eventManager,
+    SampleCombatSession* sampleCombatSession) {
     this->textureManager = textureManager;
     this->font = font;
     this->gameData = gameData;
     this->questManager = questManager;
     this->saveManager = saveManager;
     this->eventManager = eventManager;
+    this->sampleCombatSession = sampleCombatSession;
 
     request = SceneRequest::None;
 
@@ -157,6 +164,18 @@ void PlayScene::HandleEvents(SDL_Event& event) {
         if (event.key.keysym.sym == SDLK_ESCAPE) {
             request = SceneRequest::GoToPause;
         }
+        if (event.key.keysym.sym == SDLK_b) {
+            SampleCombatRequest combatRequest;
+
+            combatRequest.playerCharacterId = "player";
+            combatRequest.enemyCharacterId = "slime";
+            combatRequest.enemyInstanceId = "field_slime_01";
+            combatRequest.returnSceneName = "Play";
+
+            if(sampleCombatSession->Begin(combatRequest)) {
+                request = SceneRequest::GoToSampleCombat;
+            }
+        }
         if (event.key.keysym.sym == SDLK_e){
             if (dialogueBox.IsVisible()) {
                 dialogueBox.Next();
@@ -189,10 +208,6 @@ void PlayScene::HandleEvents(SDL_Event& event) {
                 questManager->UpdateQuestProgress();
             }
         }
-        if (event.key.keysym.sym == SDLK_SPACE) {
-            
-        }
-
     }
 }
 

@@ -33,6 +33,36 @@ void Game::Init() {
     // Basic Combat Sample 전용 데이터
     SampleCombatDatabase::Init();
   
+    SampleCombatRequest testRequest;
+
+    testRequest.playerCharacterId = "player";
+    testRequest.enemyCharacterId = "slime";
+    testRequest.enemyInstanceId = "field_slime_01";
+    testRequest.returnSceneName = "Play";
+
+    if (sampleCombatSession.Begin(testRequest)) {
+        std::printf(
+            "[SampleCombatSession] Request created: "
+            "%s vs %s, instance=%s\n",
+            sampleCombatSession
+                .GetRequest()
+                .playerCharacterId
+                .c_str(),
+
+            sampleCombatSession
+                .GetRequest()
+                .enemyCharacterId
+                .c_str(),
+
+            sampleCombatSession
+                .GetRequest()
+                .enemyInstanceId
+                .c_str()
+    );
+
+    sampleCombatSession.Cancel();
+}
+
     //아이템 데이터 베이스 초기화
     ItemDatabase::Init();
 
@@ -75,8 +105,9 @@ void Game::Init() {
 
     //씬 구성
     sceneManager.AddScene("MainMenu", new MainMenuScene(font));
-    sceneManager.AddScene("Play", new PlayScene(textureManager, font, &gameData, questManager, saveManager,&eventManager));
+    sceneManager.AddScene("Play", new PlayScene(textureManager, font, &gameData, questManager, saveManager,&eventManager, &sampleCombatSession));
     sceneManager.AddScene("Pause", new PauseScene(font));
+    sceneManager.AddScene("SampleCombat", new SampleCombatScene(textureManager, font, &sampleCombatSession));
     sceneManager.AddScene("Shop", new ShopScene(font, &gameData));
     sceneManager.AddScene("Inventory", new InventoryScene(font, &gameData));
     sceneManager.AddScene("QuestLog", new QuestScene(font, &gameData));

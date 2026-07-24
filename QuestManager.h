@@ -26,7 +26,11 @@ public:
     
     void UpdateQuestProgress();
     void UpdateCollectQuestProgress(const std::string& itemId);
-    void UpdateKillQuestProgress(const std::string& enemyId, int killCount = 1);
+    void ReportObjective(
+        QuestObjectiveType objectiveType,
+        const std::string& targetId,
+        int amount = 1
+    );
     bool CanComplete(const std::string& id);
     QuestResult CompleteQuest(const std::string& id);
     bool GiveReward(const std::string& id);
@@ -35,12 +39,11 @@ public:
     bool IsCompleted(const std::string& id);  
 
 private:
-    GameData* gameData;
-    EventManager* eventManager;
+    GameData* gameData = nullptr;
+    EventManager* eventManager = nullptr;
 
     std::unordered_map<std::string, Quest> questDatabase;
 
     EventManager::ListenerId itemAddedListenerId = 0;
     EventManager::ListenerId itemRemovedListenerId = 0;
-    EventManager::ListenerId enemyKilledListenerId = 0;
 };

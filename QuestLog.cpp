@@ -8,13 +8,13 @@ void QuestLog::AddQuest(const Quest& quest){
     printf("Quest Added : %s\n", quest.title.c_str());
 }
 
-bool QuestLog::HasQuest(const std::string& id) {
-    for(auto& q : quests) {
-        if(q.id == id) {
+bool QuestLog::HasQuest(const std::string& id) const {
+    for (const auto& quest : quests) {
+        if (quest.id == id) {
             return true;
         }
     }
-    printf("Quest : %s Not Found\n", id);
+
     return false;
 }
 
@@ -30,12 +30,20 @@ bool QuestLog::RemoveQuest(const std::string& id) {
 }
 
 Quest* QuestLog::GetQuest(const std::string& id) {
-    for(auto& q : quests) {
-        if(q.id == id){
-            return &q;
+    for (auto& quest : quests) {
+        if (quest.id == id) {
+            return &quest;
         }
     }
-    printf("Quest : %s Not Found\n", id);
+    return nullptr;
+}
+
+const Quest* QuestLog::GetQuest(const std::string& id) const {
+    for (const auto& quest : quests) {
+        if (quest.id == id) {
+            return &quest;
+        }
+    }
     return nullptr;
 }
 
