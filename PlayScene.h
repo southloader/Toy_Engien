@@ -75,10 +75,15 @@ private:
     void UpdateCamera(Entity& player);
     void CheckNPCInteraction();
 
-    void MovePlayer(Entity& player, int moveX, int moveY);
-    void MoveAndCollideX(Entity& entity, int moveX);
-    void MoveAndCollideY(Entity& entity, int moveY);
+
+    bool CheckEnemyInteraction();
+    void StartCombatWithEnemy(const Entity& enemy);
+    void ProcessCombatResult();
+    bool RemoveEntityByInstanceId(const std::string& instanceId);
 
     void ShowQuestInteraction(NPC& npc);
     
+    void MovePlayer(Entity& player, int moveX, int moveY);
+    void MoveAndCollideX(Entity& entity, int moveX);
+    void MoveAndCollideY(Entity& entity, int moveY);
 };

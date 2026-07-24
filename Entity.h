@@ -20,6 +20,7 @@ enum class Direction {
 class Entity {
 public:
     std::string characterId;
+    std::string instanceId;
     int x = 0;
     int y = 0;
 

@@ -3,6 +3,7 @@
 #include "SaveManager.h"
 #include "EventManager.h"
 #include <cstdio>
+#include <algorithm>
 
 PlayScene::PlayScene(
     TextureManager* textureManager, 
@@ -43,23 +44,29 @@ PlayScene::PlayScene(
 void PlayScene::InitEntities() {
 
     Entity player;
+    
+    player.instanceId = "field_player";
+
     player.x = 100;
     player.y = 100;
     player.width = 50;
     player.height = 50;
     player.type = PLAYER;
+    
 
     player.LoadCharacter(CharacterDatabase::Get("player"), textureManager);
-
     entities.push_back(player);
 
     Entity slime;
+
+    slime.instanceId = "field_slime_01";
 
     slime.x = 400;
     slime.y = 250;
     slime.width = 50;
     slime.height = 50;
     slime.type = ENEMY;
+    
 
     slime.LoadCharacter(CharacterDatabase::Get("slime"),textureManager);
     entities.push_back(slime);
@@ -164,24 +171,14 @@ void PlayScene::HandleEvents(SDL_Event& event) {
         if (event.key.keysym.sym == SDLK_ESCAPE) {
             request = SceneRequest::GoToPause;
         }
-        if (event.key.keysym.sym == SDLK_b) {
-            SampleCombatRequest combatRequest;
-
-            combatRequest.playerCharacterId = "player";
-            combatRequest.enemyCharacterId = "slime";
-            combatRequest.enemyInstanceId = "field_slime_01";
-            combatRequest.returnSceneName = "Play";
-
-            if(sampleCombatSession->Begin(combatRequest)) {
-                request = SceneRequest::GoToSampleCombat;
-            }
-        }
         if (event.key.keysym.sym == SDLK_e){
             if (dialogueBox.IsVisible()) {
                 dialogueBox.Next();
             }
             else {
-                CheckNPCInteraction();
+                if (!CheckEnemyInteraction()){
+                    CheckNPCInteraction();
+                }
             }
         }
         if (event.key.keysym.sym == SDLK_i) {
@@ -209,6 +206,81 @@ void PlayScene::HandleEvents(SDL_Event& event) {
             }
         }
     }
+}
+
+bool PlayScene::RemoveEntityByInstanceId(const std::string& instanceId) {
+    if (instanceId.empty()) {
+        return false;
+    }
+    const std::size_t previousSize = entities.size();
+    entities.erase(
+        std::remove_if(
+            entities.begin(),
+            entities.end(),
+            [&instanceId](const Entity& entity) {
+                return entity.instanceId == instanceId;
+            }
+        ),
+        entities.end()
+    );
+
+    return entities.size() < previousSize;
+}
+
+void PlayScene::ProcessCombatResult() {
+    if (sampleCombatSession == nullptr) {
+        return;
+    }
+
+    if (!sampleCombatSession->HasResult()) {
+        return;
+    }
+
+    const SampleCombatResult result = sampleCombatSession->GetResult();
+
+    if (result.IsVictory()) {
+        if (result.ShouldRemoveEnemy()) {
+            const bool removed =
+                RemoveEntityByInstanceId(
+                    result.enemyInstanceId
+                );
+
+            if (removed) {
+                std::printf(
+                    "[PlayScene] Removed defeated "
+                    "field entity: %s\n",
+                    result.enemyInstanceId.c_str()
+                );
+            }
+            else {
+                std::printf(
+                    "[PlayScene] Defeated entity "
+                    "not found: %s\n",
+                    result.enemyInstanceId.c_str()
+                );
+            }
+        }
+
+        if (questManager != nullptr && !result.defeatedCharacterId.empty()) {
+            questManager->ReportObjective(
+                QuestObjectiveType::DefeatTarget,
+                result.defeatedCharacterId,
+                1
+            );
+        }
+
+        questNotification.Show("Enemy Defeated!");
+    }
+    else if (result.IsDefeat()) {
+        questNotification.Show("You were defeated...");
+    }
+    else if (result.outcome== SampleCombatOutcome::Escaped) {
+        questNotification.Show("Escaped from battle.");
+    }
+
+    // 같은 결과가 매 프레임 반복 처리되지 않도록
+    // 반드시 마지막에 제거한다.
+    sampleCombatSession->ClearResult();
 }
 
 void PlayScene::ProcessDialogueAction() {
@@ -317,6 +389,114 @@ void PlayScene::ProcessDialogueAction() {
     dialogueBox.ClearRequest();
 }
 
+bool PlayScene::CheckEnemyInteraction() {
+    Entity* player = GetPlayer();
+    if (player == nullptr) {
+        return false;
+    }
+
+    Entity* nearestEnemy = nullptr;
+    int nearestDistanceSquared = 0;
+    constexpr int interactionDistance = 80;
+    constexpr int interactionDistanceSquared = interactionDistance * interactionDistance;
+    const int playerCenterX = player->x + player->width / 2;
+    const int playerCenterY = player->y + player->height / 2;
+
+    for (auto& entity : entities) {
+        if (entity.type != ENEMY) {
+            continue;
+        }
+
+        if (entity.instanceId.empty()) {
+            continue;
+        }
+
+        const int enemyCenterX = entity.x + entity.width / 2;
+        const int enemyCenterY = entity.y + entity.height / 2;
+        const int dx = playerCenterX - enemyCenterX;
+        const int dy = playerCenterY - enemyCenterY;
+        const int distanceSquared = dx * dx + dy * dy;
+
+        if (distanceSquared > interactionDistanceSquared){
+            continue;
+        }
+        if ( nearestEnemy == nullptr || distanceSquared < nearestDistanceSquared) {
+            nearestEnemy = &entity;
+            nearestDistanceSquared =
+                distanceSquared;
+        }
+    }
+
+    if (nearestEnemy == nullptr){
+        return false;
+    }
+
+    StartCombatWithEnemy(*nearestEnemy);
+    return true;
+}
+
+void PlayScene::StartCombatWithEnemy(const Entity& enemy) {
+    if (sampleCombatSession == nullptr) {
+        std::printf(
+            "[PlayScene] "
+            "SampleCombatSession is null.\n"
+        );
+
+        return;
+    }
+
+    if (sampleCombatSession->IsActive()) {
+        std::printf(
+            "[PlayScene] "
+            "A combat session is already active.\n"
+        );
+
+        return;
+    }
+
+    if (enemy.characterId.empty()) {
+        std::printf(
+            "[PlayScene] "
+            "Enemy characterId is empty.\n"
+        );
+
+        return;
+    }
+
+    if (enemy.instanceId.empty()) {
+        std::printf(
+            "[PlayScene] "
+            "Enemy instanceId is empty.\n"
+        );
+
+        return;
+    }
+
+    SampleCombatRequest combatRequest;
+    combatRequest.playerCharacterId = "player";
+    combatRequest.enemyCharacterId = enemy.characterId;
+    combatRequest.enemyInstanceId = enemy.instanceId;
+    combatRequest.returnSceneName = "Play";
+
+    if (!sampleCombatSession->Begin(combatRequest)) {
+        std::printf(
+            "[PlayScene] "
+            "Failed to begin sample combat.\n"
+        );
+
+        return;
+    }
+
+    std::printf(
+        "[PlayScene] Combat started: "
+        "%s, instance=%s\n",
+        enemy.characterId.c_str(),
+        enemy.instanceId.c_str()
+    );
+
+    request = SceneRequest::GoToSampleCombat;
+}
+
 void PlayScene::CheckNPCInteraction() {
     Entity* player = GetPlayer();
     if (player == nullptr){
@@ -327,7 +507,7 @@ void PlayScene::CheckNPCInteraction() {
         if (!IsNear(
             *player,
             npc.GetEntity(),
-            80
+            40
         )){
             continue;
         }
@@ -552,6 +732,7 @@ void PlayScene::MoveAndCollideY(Entity& entity, int moveY) {
 }
 
 void PlayScene::Update() {
+    ProcessCombatResult();
     UpdatePlayer();
     UpdateEntities();
 
