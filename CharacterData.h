@@ -1,10 +1,8 @@
 #pragma once
 
 #include <string>
-#include <vector>
 #include <unordered_map>
-
-#include "CombatStats.h"
+#include <vector>
 
 struct AnimationData {
     std::vector<std::string> textureIds;
@@ -17,10 +15,14 @@ struct CharacterData {
     std::string defaultAnimation = "Idle";
 
     CharacterData() = default;
-    CombatStats combatStats;
 
-    CharacterData(const std::string& id);
-    void AddAnimation(const std::string& name, const std::vector<std::string>& frames, int frameDelay);
+    explicit CharacterData(const std::string& id);
+
+    void AddAnimation(
+        const std::string& name,
+        const std::vector<std::string>& frames,
+        int frameDelay
+    );
+
     void SetDefaultAnimation(const std::string& name);
-    void SetCombatStats(const CombatStats& stats);
 };

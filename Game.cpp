@@ -1,4 +1,5 @@
 #include "Game.h"
+#include "SampleCombatDatabase.h"
 
 //Game 생성자
 void Game::Init() {
@@ -28,6 +29,9 @@ void Game::Init() {
 
     //캐릭터 데이터 베이스 초기화
     CharacterDatabase::Init(textureManager);
+
+    // Basic Combat Sample 전용 데이터
+    SampleCombatDatabase::Init();
   
     //아이템 데이터 베이스 초기화
     ItemDatabase::Init();

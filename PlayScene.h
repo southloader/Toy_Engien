@@ -13,7 +13,6 @@
 #include "GameData.h"
 #include "QuestManager.h"
 #include "QuestNotification.h"
-#include "CombatSystem.h"
 
 class SaveManager;
 
@@ -48,12 +47,10 @@ private:
     QuestNotification questNotification;
     SaveManager* saveManager;
     EventManager* eventManager = nullptr;
-    CombatSystem combatSystem;
 
     unsigned int questAcceptedListenerId = 0;
     unsigned int questCompletedListenerId = 0;
     unsigned int questAbandonedListenerId = 0;
-    unsigned int enemyKilledListenerId = 0;
     unsigned int gameSavedListenerId = 0;
     unsigned int gameLoadedListenerId = 0;
     
@@ -73,7 +70,4 @@ private:
     void MoveAndCollideY(Entity& entity, int moveY);
 
     void ShowQuestInteraction(NPC& npc);
-
-    Entity* GetFirstEnemy();
-    void TestPlayerAttack();
 };

@@ -1,10 +1,8 @@
 #pragma once
 
-#include "Entity.h"
-#include "EventManager.h"
+#include "SampleCombatant.h"
 
-struct AttackResult
-{
+struct AttackResult {
     bool success = false;
 
     int requestedDamage = 0;
@@ -18,37 +16,18 @@ struct AttackResult
 
 class CombatSystem {
 public:
-    CombatSystem() = default;
-    explicit CombatSystem(EventManager* eventManager);
-
-    void SetEventManager(EventManager* eventManager);
-
     AttackResult Attack(
-        Entity& attacker,
-        Entity& target
-    );
+        SampleCombatant& attacker,
+        SampleCombatant& target
+    ) const;
 
     int CalculateDamage(
-        const Entity& attacker,
-        const Entity& target
+        const SampleCombatant& attacker,
+        const SampleCombatant& target
     ) const;
 
     bool CanAttack(
-        const Entity& attacker,
-        const Entity& target
+        const SampleCombatant& attacker,
+        const SampleCombatant& target
     ) const;
-
-private:
-    EventManager* eventManager = nullptr;
-
-    void EmitDamageEvent(
-        const Entity& attacker,
-        const Entity& target,
-        int damage
-    );
-
-    void EmitDefeatedEvent(
-        const Entity& attacker,
-        const Entity& target
-    );
 };

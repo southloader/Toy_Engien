@@ -3,7 +3,6 @@
 #include "Camera.h"
 #include "Animator.h"
 #include "CharacterData.h"
-#include "CombatStats.h"
 #include "TextureManager.h"
 
 enum EntityType {
@@ -32,9 +31,6 @@ public:
 
     SDL_Texture* texture = nullptr;
     Animator animator;
-
-    // 해당 Entity만의 현재 전투 상태
-    CombatStats combatStats;
 
     bool CheckCollision(Entity& other);
 
