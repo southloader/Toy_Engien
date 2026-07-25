@@ -1,4 +1,9 @@
 #include "Game.h"
+
+#include "CharacterDatabase.h"
+#include "ItemDatabase.h"
+#include "QuestDatabase.h"
+#include "ShopDatabase.h"
 #include "SampleCombatDatabase.h"
 
 //Game 생성자
@@ -32,39 +37,40 @@ void Game::Init() {
 
     // Basic Combat Sample 전용 데이터
     SampleCombatDatabase::Init();
-  
-    SampleCombatRequest testRequest;
-
-    testRequest.playerCharacterId = "player";
-    testRequest.enemyCharacterId = "slime";
-    testRequest.enemyInstanceId = "field_slime_01";
-    testRequest.returnSceneName = "Play";
-
-    if (sampleCombatSession.Begin(testRequest)) {
-        std::printf(
-            "[SampleCombatSession] Request created: "
-            "%s vs %s, instance=%s\n",
-            sampleCombatSession
-                .GetRequest()
-                .playerCharacterId
-                .c_str(),
-
-            sampleCombatSession
-                .GetRequest()
-                .enemyCharacterId
-                .c_str(),
-
-            sampleCombatSession
-                .GetRequest()
-                .enemyInstanceId
-                .c_str()
-    );
-
-    sampleCombatSession.Cancel();
-}
 
     //아이템 데이터 베이스 초기화
-    ItemDatabase::Init();
+    if(!ItemDatabase::Init("data/items.json")) {
+        std::printf(
+            "[Game] Failed to initialize "
+            "ItemDatabase.\n"
+        );
+    }
+
+    const bool itemDatabaseReady =
+    ItemDatabase::Init(
+        "data/items.json"
+    );
+
+    if (!itemDatabaseReady)
+    {
+        std::printf(
+            "[Game] Failed to initialize "
+            "ItemDatabase.\n"
+        );
+    }
+
+    if (
+        itemDatabaseReady &&
+        !ShopDatabase::Init(
+            "data/shops.json"
+        )
+    )
+    {
+        std::printf(
+            "[Game] Failed to initialize "
+            "ShopDatabase.\n"
+        );
+    }
 
     //퀘스트 데이터 베이스 초기화
     QuestDatabase::Init();
@@ -108,7 +114,7 @@ void Game::Init() {
     sceneManager.AddScene("Play", new PlayScene(textureManager, font, &gameData, questManager, saveManager,&eventManager, &sampleCombatSession));
     sceneManager.AddScene("Pause", new PauseScene(font));
     sceneManager.AddScene("SampleCombat", new SampleCombatScene(textureManager, font, &sampleCombatSession));
-    sceneManager.AddScene("Shop", new ShopScene(font, &gameData));
+    sceneManager.AddScene("Shop", new ShopScene(font, &gameData,"village_shop"));
     sceneManager.AddScene("Inventory", new InventoryScene(font, &gameData));
     sceneManager.AddScene("QuestLog", new QuestScene(font, &gameData));
     sceneManager.ChangeScene("MainMenu");

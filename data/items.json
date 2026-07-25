@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "id": "potion",
+      "name": "Potion",
+      "description": "Restore HP.",
+      "maxStack": 99
+    },
+    {
+      "id": "old_sword",
+      "name": "Old Sword",
+      "description": "A worn old sword.",
+      "maxStack": 1
+    }
+  ]
+}

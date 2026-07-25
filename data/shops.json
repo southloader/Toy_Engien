@@ -1,0 +1,22 @@
+{
+  "shops": [
+    {
+      "id": "village_shop",
+      "name": "Village Shop",
+      "items": [
+        {
+          "itemId": "potion",
+          "price": 50
+        },
+        {
+          "itemId": "old_sword",
+          "price": 100
+        },
+        {
+  "itemId": "legendary_cookie",
+  "price": 999
+}
+      ]
+    }
+  ]
+}

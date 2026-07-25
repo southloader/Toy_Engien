@@ -1,15 +1,16 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <unordered_map>
 
-#include "Item.h"
+#include "ShopData.h"
 
-class ItemDatabase {
+class ShopDatabase {
 public:
     static bool Init(
-        const std::string& filePath =
-            "data/items.json"
+        const std::string& filePath = 
+            "data/shops.json"
     );
 
     static bool LoadFromJson(
@@ -17,14 +18,14 @@ public:
     );
 
     static bool Register(
-        const Item& item
+        const ShopData& shop
     );
 
     static bool Contains(
         const std::string& id
     );
 
-    static Item Get(
+    static const ShopData* Get(
         const std::string& id
     );
 
@@ -35,6 +36,6 @@ public:
 private:
     static std::unordered_map<
         std::string,
-        Item
-    > items;
+        ShopData
+    > shops;
 };
