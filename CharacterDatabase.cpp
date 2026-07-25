@@ -36,6 +36,12 @@ void CharacterDatabase::Init(TextureManager* textureManager) {
     slime.AddAnimation("Idle", {"slime"}, 1000);
     slime.SetDefaultAnimation("Idle");
     Register(slime);
+
+    textureManager->LoadTexture("golem","assets/golem.png");
+    CharacterData golem("golem");
+    golem.AddAnimation("Idle", {"golem"}, 1000);
+    golem.SetDefaultAnimation("Idle");
+    Register(golem);
 }
 
 void CharacterDatabase::Register(const CharacterData& character) {

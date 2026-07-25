@@ -48,7 +48,7 @@ void QuestDatabase::Init() {
 
     killSlime.id = "kill_slime";
     killSlime.title = "Slime Hunter";
-    killSlime.description = "Defeat 1 slime.";
+    killSlime.description = "Defeat 2 slime.";
 
     killSlime.state = QuestState::Available;
     killSlime.objectiveType = QuestObjectiveType::DefeatTarget;
@@ -58,7 +58,7 @@ void QuestDatabase::Init() {
 
     // CombatSystem의 EnemyKilled 이벤트 subjectId와 같아야 한다.
     killSlime.targetId = "slime";
-    killSlime.targetCount = 1;
+    killSlime.targetCount = 2;
     killSlime.currentCount = 0;
 
     killSlime.rewardItemId = "potion";
@@ -66,12 +66,12 @@ void QuestDatabase::Init() {
     killSlime.rewardGold = 50;
 
     killSlime.offerDialogue =
-        "마을 근처에 슬라임이 나타났네. 한 마리만 처치해 주겠나?";
+        "마을 근처에 슬라임이 나타났네. 처치해 주겠나?";
 
     killSlime.acceptDialogue =
     {
         "고맙네.",
-        "슬라임 한 마리를 처치하고 돌아오게."
+        "슬라임 두 마리를 처치하고 돌아오게."
     };
 
     killSlime.progressDialogue =

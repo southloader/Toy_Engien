@@ -26,6 +26,16 @@ void SampleCombatDatabase::Init() {
             4   // 속도
         )
     );
+
+    Register(
+        "golem",
+        CombatStats(
+            200, // 최대 체력
+            50,  // 공격력
+            20,  // 방어력
+            7   // 속도
+        )
+    );
 }
 
 void SampleCombatDatabase::Register(const std::string& characterId, const CombatStats& stats) {

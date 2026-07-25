@@ -57,19 +57,46 @@ void PlayScene::InitEntities() {
     player.LoadCharacter(CharacterDatabase::Get("player"), textureManager);
     entities.push_back(player);
 
-    Entity slime;
+    Entity slime01;
 
-    slime.instanceId = "field_slime_01";
+    slime01.instanceId = "field_slime_01";
 
-    slime.x = 400;
-    slime.y = 250;
-    slime.width = 50;
-    slime.height = 50;
-    slime.type = ENEMY;
+    slime01.x = 400;
+    slime01.y = 250;
+    slime01.width = 50;
+    slime01.height = 50;
+    slime01.type = ENEMY;
+
+    slime01.LoadCharacter(CharacterDatabase::Get("slime"),textureManager);
+    entities.push_back(slime01);
+
     
+    Entity slime02;
 
-    slime.LoadCharacter(CharacterDatabase::Get("slime"),textureManager);
-    entities.push_back(slime);
+    slime02.instanceId = "field_slime_02";
+
+    slime02.x = 700;
+    slime02.y = 250;
+    slime02.width = 50;
+    slime02.height = 50;
+    slime02.type = ENEMY;
+    
+    slime02.LoadCharacter(CharacterDatabase::Get("slime"),textureManager);
+    entities.push_back(slime02);
+
+
+    Entity golem;
+
+    golem.instanceId = "field_golem_01";
+
+    golem.x = 1000;
+    golem.y = 250;
+    golem.width = 100;
+    golem.height = 100;
+    golem.type = ENEMY;
+    
+    golem.LoadCharacter(CharacterDatabase::Get("golem"),textureManager);
+    entities.push_back(golem);
 }
 
 Entity* PlayScene::GetPlayer() {
