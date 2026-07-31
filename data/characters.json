@@ -1,0 +1,83 @@
+{
+  "characters": [
+    {
+      "id": "player",
+      "defaultAnimation": "Idle",
+      "animations": [
+        {
+          "name": "Idle",
+          "frames": [
+            "player_idle"
+          ],
+          "frameDelay": 1000
+        },
+        {
+          "name": "Walk",
+          "frames": [
+            "player_walk_1",
+            "player_walk_2",
+            "player_walk_3"
+          ],
+          "frameDelay": 120
+        },
+        {
+          "name": "Run",
+          "frames": [
+            "player_run_1",
+            "player_run_2",
+            "player_run_3"
+          ],
+          "frameDelay": 70
+        }
+      ]
+    },
+    {
+      "id": "npc",
+      "defaultAnimation": "Idle",
+      "animations": [
+        {
+          "name": "Idle",
+          "frames": [
+            "npc_idle"
+          ],
+          "frameDelay": 1000
+        },
+        {
+          "name": "Walk",
+          "frames": [
+            "npc_walk_1",
+            "npc_walk_2",
+            "npc_walk_3"
+          ],
+          "frameDelay": 150
+        }
+      ]
+    },
+    {
+      "id": "slime",
+      "defaultAnimation": "Idle",
+      "animations": [
+        {
+          "name": "Idle",
+          "frames": [
+            "slime"
+          ],
+          "frameDelay": 1000
+        }
+      ]
+    },
+    {
+      "id": "golem",
+      "defaultAnimation": "Idle",
+      "animations": [
+        {
+          "name": "Idle",
+          "frames": [
+            "golem"
+          ],
+          "frameDelay": 1000
+        }
+      ]
+    }
+  ]
+}

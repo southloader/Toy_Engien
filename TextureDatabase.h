@@ -3,29 +3,35 @@
 #include <cstddef>
 #include <string>
 #include <unordered_map>
-#include "CharacterData.h"
 
-class CharacterDatabase
+#include "TextureData.h"
+
+class TextureManager;
+
+class TextureDatabase
 {
 public:
     static bool Init(
+        TextureManager* textureManager,
         const std::string& filePath =
-            "data/characters.json"
+            "data/textures.json"
     );
 
     static bool LoadFromJson(
+        TextureManager* textureManager,
         const std::string& filePath
     );
 
     static bool Register(
-        const CharacterData& character
+        TextureManager* textureManager,
+        const TextureData& textureData
     );
 
     static bool Contains(
         const std::string& id
     );
 
-    static CharacterData Get(
+    static const TextureData* Get(
         const std::string& id
     );
 
@@ -36,6 +42,6 @@ public:
 private:
     static std::unordered_map<
         std::string,
-        CharacterData
-    > characters;
+        TextureData
+    > textures;
 };

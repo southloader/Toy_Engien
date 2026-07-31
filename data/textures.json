@@ -1,0 +1,56 @@
+{
+  "textures": [
+    {
+      "id": "player_idle",
+      "path": "assets/player.png"
+    },
+    {
+      "id": "player_walk_1",
+      "path": "assets/player_walk1.png"
+    },
+    {
+      "id": "player_walk_2",
+      "path": "assets/player_walk2.png"
+    },
+    {
+      "id": "player_walk_3",
+      "path": "assets/player_walk3.png"
+    },
+    {
+      "id": "player_run_1",
+      "path": "assets/player_run1.png"
+    },
+    {
+      "id": "player_run_2",
+      "path": "assets/player_run2.png"
+    },
+    {
+      "id": "player_run_3",
+      "path": "assets/player_run3.png"
+    },
+    {
+      "id": "npc_idle",
+      "path": "assets/npc.png"
+    },
+    {
+      "id": "npc_walk_1",
+      "path": "assets/player_walk1.png"
+    },
+    {
+      "id": "npc_walk_2",
+      "path": "assets/player_walk2.png"
+    },
+    {
+      "id": "npc_walk_3",
+      "path": "assets/player_walk3.png"
+    },
+    {
+      "id": "slime",
+      "path": "assets/slime.png"
+    },
+    {
+      "id": "golem",
+      "path": "assets/golem.png"
+    }
+  ]
+}

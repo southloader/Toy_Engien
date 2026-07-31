@@ -1,6 +1,7 @@
 #include "Game.h"
 
 #include "CharacterDatabase.h"
+#include "TextureDatabase.h"
 #include "ItemDatabase.h"
 #include "QuestDatabase.h"
 #include "ShopDatabase.h"
@@ -32,20 +33,37 @@ void Game::Init() {
     textureManager = new TextureManager(renderer);
     textureManager->LoadTexture("wall", "assets/brickWall.png");
 
-    //캐릭터 데이터 베이스 초기화
-    CharacterDatabase::Init(textureManager);
+    const bool textureDatabaseReady = 
+        TextureDatabase::Init(
+            textureManager,
+            "data/textures.json"
+        );
+    
+    if (!textureDatabaseReady)
+    {
+        std::printf(
+            "[Game] Failed to initialize "
+            "TextureDatabase.\n"
+        );
+    }
+
+    if (
+        textureDatabaseReady &&
+        !CharacterDatabase::Init(
+            "data/characters.json"
+        )
+    )
+    {
+        std::printf(
+            "[Game] Failed to initialize "
+            "CharacterDatabase.\n"
+        );
+    }
 
     // Basic Combat Sample 전용 데이터
     SampleCombatDatabase::Init();
 
     //아이템 데이터 베이스 초기화
-    if(!ItemDatabase::Init("data/items.json")) {
-        std::printf(
-            "[Game] Failed to initialize "
-            "ItemDatabase.\n"
-        );
-    }
-
     const bool itemDatabaseReady =
     ItemDatabase::Init(
         "data/items.json"
