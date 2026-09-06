@@ -1,23 +1,23 @@
 {
     "configurations": [
         {
-            "name": "Win32",
+            "name": "MinGW-UCRT64",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/Users/user/Desktop/Toy_Engine/SDL2/x86_64-w64-mingw32/include/SDL2",
-                "C:/Users/user/Desktop/Toy_Engine/SDL2_ttf/x86_64-w64-mingw32/include/SDL2",
-                "C:/Users/user/Desktop/Toy_Engine/SDL2_image/x86_64-w64-mingw32/include/SDL2"
+                "${workspaceFolder}/third_party",
+                "${workspaceFolder}/SDL2/x86_64-w64-mingw32/include/SDL2",
+                "${workspaceFolder}/SDL2_ttf/x86_64-w64-mingw32/include/SDL2",
+                "${workspaceFolder}/SDL2_image/x86_64-w64-mingw32/include/SDL2"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
                 "_UNICODE"
             ],
-            "windowsSdkVersion": "10.0.22000.0",
-            "compilerPath": "cl.exe",
+            "compilerPath": "C:/msys64/ucrt64/bin/g++.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "windows-msvc-x64"
+            "intelliSenseMode": "windows-gcc-x64"
         }
     ],
     "version": 4
